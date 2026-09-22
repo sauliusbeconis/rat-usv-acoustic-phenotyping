@@ -1,0 +1,13 @@
+# Copy to local.yaml (ignored). All relative paths resolve from this config file.
+source_root: /absolute/path/to/immutable/source
+output_root: ../../.local/runs
+exclude_relative: []
+hash:
+  mode: budget
+  max_file_bytes: 67108864
+  max_total_bytes: 536870912
+audit_hash:
+  mode: budget
+  max_file_bytes: 268435456
+  max_total_bytes: 536870912
+audio_window_seconds: 1.0

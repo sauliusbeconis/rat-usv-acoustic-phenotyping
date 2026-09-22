@@ -1,0 +1,6 @@
+status: draft
+# Diagnostics flag review; they do not exclude recordings.
+audio_windows: [start, middle, end]
+clip_definition: PCM full-scale endpoint samples; float absolute amplitude >= 1
+silence_definition: exact digital zero
+thresholds_for_exclusion: null

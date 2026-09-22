@@ -1,0 +1,11 @@
+schema_version: 1
+datasets:
+  - dataset_id: historical_rat_usv
+    status: inventory_only
+    source_config: configs/data/local.yaml
+    source_access: local_private
+    data_license: unresolved
+    biological_identity_resolution: pending
+    protocol_status: draft
+    public_raw_data: false
+    manifests: []

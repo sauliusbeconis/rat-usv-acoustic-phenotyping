@@ -1,0 +1,11 @@
+experiment_id: null
+status: planned
+hypothesis_id: null
+protocol_version: null
+dataset_manifest_sha256: null
+split_manifest_sha256: null
+seed: null
+primary_metric: null
+fit_scope: train_only
+run_id: null
+# No executable training configuration exists yet.

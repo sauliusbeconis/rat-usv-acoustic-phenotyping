@@ -1,0 +1,24 @@
+# Run from repo root: uv run --group workflow snakemake -s workflow/Snakefile --cores 1
+# Configure USV_CONFIG if using another local source configuration.
+import os
+from pathlib import Path
+
+config_path = os.environ.get("USV_CONFIG", "configs/data/local.yaml")
+if not Path(config_path).is_file():
+    raise ValueError("Create configs/data/local.yaml from example.yaml first")
+
+rule all:
+    input:
+        ".local/workflow/inventory.done"
+
+rule inventory:
+    output:
+        touch(".local/workflow/inventory.done")
+    params:
+        cfg=config_path
+    shell:
+        "uv run --frozen --group workflow usv inventory --config {params.cfg:q}"
+
+# Each CLI invocation writes a new immutable run directory.
+# Audit/crosswalk/atlas stay explicit CLI steps until M0 dependencies are approved.
+# Delete only this generated .done marker to request another snapshot.

@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rat-usv-acoustic-phenotyping"
+version = "0.1.0"
+description = "Provenance-first rat USV research infrastructure"
+readme = "README.md"
+requires-python = ">=3.12,<3.15"
+dependencies = ["typer>=0.16,<1", "pydantic>=2.10,<3", "pyarrow>=19,<30", "PyYAML>=6,<7", "numpy>=2,<3", "soundfile>=0.13,<1"]
+
+[project.scripts]
+usv = "rat_usv.cli:app"
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "pytest-cov>=6,<8", "ruff>=0.11,<1", "mypy>=1.15,<2", "types-PyYAML>=6", "pre-commit>=4,<5"]
+workflow = ["snakemake>=9,<10"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rat_usv"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501", "B008"]
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src/rat_usv"]
+check_untyped_defs = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = ["pyarrow.*", "soundfile.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = ["scientific: scientific validity invariants"]

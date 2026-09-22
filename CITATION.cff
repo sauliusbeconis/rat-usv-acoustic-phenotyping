@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "Please cite the released software version used; this scaffold is not a published scientific result."
+title: "Rat USV Acoustic Phenotyping"
+type: software
+version: 0.1.0
+authors:
+  - family-names: "Beconis"
+    given-names: "Saulius"
+repository-code: "https://github.com/sauliusbeconis/rat-usv-acoustic-phenotyping"
+# DOI, ORCID, affiliations, other authors and release date await confirmation.

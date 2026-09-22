@@ -1,0 +1,5 @@
+status: blocked_pending_M0
+resample_hz: null
+call_detector: null
+frequency_band_hz: null
+# Derive choices from acquisition metadata and annotated detector validation.

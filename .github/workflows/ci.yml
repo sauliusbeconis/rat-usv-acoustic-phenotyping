@@ -1,0 +1,27 @@
+name: research-quality
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  synthetic-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.17"
+          enable-cache: true
+      - run: uv sync --frozen --group dev --group workflow
+      - run: uv run --frozen ruff check .
+      - run: uv run --frozen ruff format --check .
+      - run: uv run --frozen mypy
+      - run: uv run --frozen pytest
+      - run: uv run --frozen python scripts/check_git_safety.py --tracked
+      - run: uv run --frozen python scripts/check_source_visibility.py
+      - run: uv run --frozen usv --help
+      - name: Synthetic workflow dry run
+        run: |
+          mkdir -p .local/synthetic-source
+          cp configs/data/example.yaml .local/ci.yaml
+          sed -i "s|/absolute/path/to/immutable/source|${PWD}/.local/synthetic-source|; s|../../.local/runs|${PWD}/.local/ci-runs|" .local/ci.yaml
+          USV_CONFIG=.local/ci.yaml uv run --frozen --group workflow snakemake -s workflow/Snakefile --cores 1 --dry-run
