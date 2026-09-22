@@ -1,5 +1,7 @@
 # Next step: original records and scientific review
 
+M0.5 compares historical input references and date/day recodes against verified M0.4 derivatives. See `docs/M0_5_METADATA_RECONCILIATION.md` and decision 0007. The private handoff is indexed at `.local/setup/m05_run_index.json` after validation. Candidate export matches, mixed script contexts and date arithmetic disagreements require review; none establishes animal identity or age. Serialized-object contents remain a separate inspection gap.
+
 M0.4 adds bounded discovery and extraction of marking, birth and recording-session evidence from an explicitly inventoried metadata root. See `docs/M0_4_METADATA_DISCOVERY.md` and decision 0006. After validation, `.local/setup/m04_run_index.json` indexes the private extraction and review handoff. Historical descriptions and code recodes remain unconfirmed; original individual logs and source-tree correspondence require separate evidence.
 
 M0.3 prepares a traceable review packet from the existing M0.1 derivatives. See `docs/M0_3_REVIEW_PACKET.md` and decision 0004. It preserves every open ledger item, expands original evidence references and explicitly identifies missing links. After validation, `.local/setup/m03_run_index.json` indexes the private packet and source-specific review brief. This is review preparation; it does not resolve scientific decisions or reopen raw sources.

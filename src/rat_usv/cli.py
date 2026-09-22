@@ -11,6 +11,7 @@ from rat_usv.config import load_config
 from rat_usv.data.crosswalk import seed_crosswalk
 from rat_usv.data.inventory import inventory as build_inventory
 from rat_usv.evidence.pilot import extract_pilot, validate_bundle_file
+from rat_usv.evidence.reconcile import reconcile_metadata as reconcile_records
 from rat_usv.evidence.review import review_packet as build_review_packet
 from rat_usv.evidence.search import metadata_search as search_metadata
 from rat_usv.provenance.io import new_run, record_run, write_json
@@ -38,6 +39,22 @@ ConfigArg = Annotated[
     ),
 ]
 InputArg = Annotated[Path, typer.Option(exists=True, dir_okay=False)]
+
+
+@app.command("reconcile-metadata")
+def reconcile_metadata(config: ConfigArg, evidence: InputArg, search_entities: InputArg) -> None:
+    """Compare historical date and input-path assertions using verified derivatives."""
+    cfg = load_config(config)
+    out = new_run(cfg, "reconcile-metadata")
+    try:
+        reconcile_records(cfg, evidence, search_entities, out)
+    except Exception as error:
+        write_json(out / "fatal_failure.json", {"error": f"{type(error).__name__}: {error}"})
+        if not (out / "run.json").exists():
+            record_run(out, "reconcile-metadata-failed", cfg, [evidence, search_entities])
+        typer.echo(out)
+        raise typer.Exit(1) from error
+    typer.echo(out)
 
 
 @app.command("metadata-search")
