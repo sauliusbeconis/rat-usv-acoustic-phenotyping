@@ -12,6 +12,7 @@ from rat_usv.data.crosswalk import seed_crosswalk
 from rat_usv.data.inventory import inventory as build_inventory
 from rat_usv.evidence.pilot import extract_pilot, validate_bundle_file
 from rat_usv.evidence.review import review_packet as build_review_packet
+from rat_usv.evidence.search import metadata_search as search_metadata
 from rat_usv.provenance.io import new_run, record_run, write_json
 from rat_usv.provenance.validation import (
     validate_fit_scope,
@@ -37,6 +38,24 @@ ConfigArg = Annotated[
     ),
 ]
 InputArg = Annotated[Path, typer.Option(exists=True, dir_okay=False)]
+
+
+@app.command("metadata-search")
+def metadata_search(config: ConfigArg, inventory: InputArg, policy: InputArg) -> None:
+    """Search a bounded hashed metadata tree without executing historical code."""
+    cfg = load_config(config)
+    out = new_run(cfg, "metadata-search")
+    try:
+        report = search_metadata(cfg, inventory, policy, out)
+    except Exception as error:
+        write_json(out / "fatal_failure.json", {"error": f"{type(error).__name__}: {error}"})
+        if not (out / "run.json").exists():
+            record_run(out, "metadata-search-failed", cfg, [inventory, policy])
+        typer.echo(out)
+        raise typer.Exit(1) from error
+    typer.echo(out)
+    if not report["success"]:
+        raise typer.Exit(1)
 
 
 @app.command("review-packet")

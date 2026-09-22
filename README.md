@@ -34,7 +34,7 @@ uv run --frozen usv validate --config configs/data/local.yaml --registry registr
 
 There is no training, automatic identity resolver, full Excel/R parser or MLflow integration yet. Hashing defaults are bounded; set `mode: full` deliberately for complete baseline coverage. Source symlinks are recorded/skipped, never followed. Inventory does not expand archives.
 
-The bounded follow-on commands are documented separately: [`evidence-pilot` and `validate-evidence`](docs/M0_1_EVIDENCE_PILOT.md), [`full-decode-pilot`](docs/M0_2_FULL_DECODE_PILOT.md), and [`review-packet`](docs/M0_3_REVIEW_PACKET.md). The review packet expands an existing ledger with exact source locators and preserves unresolved decisions.
+The bounded follow-on commands are documented separately: [`evidence-pilot` and `validate-evidence`](docs/M0_1_EVIDENCE_PILOT.md), [`full-decode-pilot`](docs/M0_2_FULL_DECODE_PILOT.md), [`review-packet`](docs/M0_3_REVIEW_PACKET.md), and [`metadata-search`](docs/M0_4_METADATA_DISCOVERY.md). The review packet expands an existing ledger with exact source locators. Metadata discovery searches an explicit inventory and retains format gaps; neither command resolves scientific decisions.
 
 ## Repository map
 

@@ -1,8 +1,10 @@
 # Next step: original records and scientific review
 
+M0.4 adds bounded discovery and extraction of marking, birth and recording-session evidence from an explicitly inventoried metadata root. See `docs/M0_4_METADATA_DISCOVERY.md` and decision 0006. After validation, `.local/setup/m04_run_index.json` indexes the private extraction and review handoff. Historical descriptions and code recodes remain unconfirmed; original individual logs and source-tree correspondence require separate evidence.
+
 M0.3 prepares a traceable review packet from the existing M0.1 derivatives. See `docs/M0_3_REVIEW_PACKET.md` and decision 0004. It preserves every open ledger item, expands original evidence references and explicitly identifies missing links. After validation, `.local/setup/m03_run_index.json` indexes the private packet and source-specific review brief. This is review preparation; it does not resolve scientific decisions or reopen raw sources.
 
-The M0 tools are ready for versioned Git delivery. Publication includes implementation, generic documentation, locked dependencies and synthetic tests only. Source-specific layout and inventory findings remain in private handoffs. Committing or pushing infrastructure does not advance the scientific gates below.
+The M0 baseline is delivered in Git. Publication includes implementation, generic documentation, locked dependencies and synthetic tests only. Source-specific layout and inventory findings remain in private handoffs. Committing or pushing infrastructure does not advance the scientific gates below.
 
 M0.2 adds full-decode technical QC for the same four WAVs exposed in M0.1. See `docs/M0_2_FULL_DECODE_PILOT.md` and decision 0003 for its bounded scope and reporting cutoffs. After validation, `.local/setup/m02_run_index.json` indexes the private handoff. Decoding coverage and digital artifacts do not determine biological validity or exclusion.
 
