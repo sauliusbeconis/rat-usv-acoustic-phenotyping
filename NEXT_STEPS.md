@@ -1,5 +1,7 @@
 # Next step: original records and scientific review
 
+A private scan-transcription pilot is indexed at `.local/setup/scan_pilot_run_index.json`. Read its review report and per-image progress file before resuming extraction. Visual readings, translations and normalized candidates are linked to source checksums and row/header locators; correction flags and unreadable text remain unresolved. This is a manual review derivative, not a new OCR CLI, verified identity crosswalk or protocol lock. Supplemental source folders remain private and are blocked by the Git data guard.
+
 M0.5 compares historical input references and date/day recodes against verified M0.4 derivatives. See `docs/M0_5_METADATA_RECONCILIATION.md` and decision 0007. The private handoff is indexed at `.local/setup/m05_run_index.json` after validation. Candidate export matches, mixed script contexts and date arithmetic disagreements require review; none establishes animal identity or age. Serialized-object contents remain a separate inspection gap.
 
 M0.4 adds bounded discovery and extraction of marking, birth and recording-session evidence from an explicitly inventoried metadata root. See `docs/M0_4_METADATA_DISCOVERY.md` and decision 0006. After validation, `.local/setup/m04_run_index.json` indexes the private extraction and review handoff. Historical descriptions and code recodes remain unconfirmed; original individual logs and source-tree correspondence require separate evidence.

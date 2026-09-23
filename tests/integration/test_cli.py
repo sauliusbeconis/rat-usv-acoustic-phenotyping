@@ -75,12 +75,30 @@ def test_only_implemented_commands_exposed() -> None:
 def test_git_guard_blocks_forced_private_index(tmp_path: Path) -> None:
     script = Path(__file__).resolve().parents[2] / "scripts/check_git_safety.py"
     subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
-    private_names = ("private.WAV", "sheet.XLSX", ".codex/session.json", "docs/.agents/session.md")
+    private_names = (
+        "private.WAV",
+        "sheet.XLSX",
+        ".codex/session.json",
+        "docs/.agents/session.md",
+        "Supplments/image.JPG",
+        "Supplments/notes.txt",
+        "Supplements/notes.txt",
+    )
+    ignore = script.parents[1] / ".gitignore"
+    (tmp_path / ".gitignore").write_text(ignore.read_text())
     for name in (*private_names, "safe.md"):
         target = tmp_path / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text("synthetic fixture only")
-    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True)
+    ignored = subprocess.run(
+        ["git", "check-ignore", "--", *private_names],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert set(ignored.stdout.splitlines()) == set(private_names)
+    subprocess.run(["git", "add", "-f", "--", *private_names, "safe.md"], cwd=tmp_path, check=True)
     result = subprocess.run(
         [sys.executable, str(script), "--staged"], cwd=tmp_path, capture_output=True, text=True
     )

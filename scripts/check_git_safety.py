@@ -42,6 +42,8 @@ BLOCK_DIRS = {
     ".codex",
     "raw",
     "private",
+    "supplments",
+    "supplements",
     "derived",
     "mlruns",
     "mlartifacts",

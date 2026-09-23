@@ -228,6 +228,8 @@ raw/
 data/
 derived/
 private/
+Supplments/
+Supplements/
 mlruns/
 mlartifacts/
 *.db
