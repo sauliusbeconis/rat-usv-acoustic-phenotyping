@@ -526,5 +526,32 @@ def temporal(
     typer.echo(out)
 
 
+@app.command("shape-test")
+def shape_test(
+    config: ConfigArg,
+    features_run: RunDir,
+    m4_table: InputArg,
+    images_run: RunDir,
+    controls_run: RunDir,
+    fragile_x_csv: InputArg,
+) -> None:
+    """Pre-registered H-M7a test (decision 0018; needs `--group ml`): this cohort + Fragile X."""
+    from rat_usv.evaluation.shape_test import test_a, test_b  # torch optional; import here
+
+    cfg = load_config(config)
+    runs = [
+        cfg.output_root / r["run"] for r in json.loads(m4_table.read_text()) if r["rung"] == "vae"
+    ]
+    out = new_run(cfg, "shape-test")
+    result = {
+        "test_a": test_a(features_run, controls_run, images_run, runs),
+        "test_b": test_b(fragile_x_csv),
+    }
+    write_json(out / "shape_test_summary.json", result)
+    record_run(out, "shape-test", cfg, [features_run / "call_features.parquet", fragile_x_csv])
+    typer.echo(json.dumps(result, indent=1))
+    typer.echo(out)
+
+
 if __name__ == "__main__":
     app()

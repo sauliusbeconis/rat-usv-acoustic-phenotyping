@@ -28,6 +28,55 @@ FEATURES = (
     "f0_median_khz", "f0_sd_khz", "bandwidth_khz", "slope_khz_per_s", "sinuosity",
     "n_jumps", "harmonic_share", "harmonic_observable_share", "tonality", "peak_freq_khz", "peak_snr_db", "mean_snr_db",
 )  # fmt: skip
+SHAPE = (
+    "onset_sweep_khz",
+    "offset_sweep_khz",
+    "u_index_khz",
+    "curvature_khz",
+    "fm_residual_sd_khz",
+    "fm_extrema_per_10ms",
+)  # fmt: skip  (pre-registered in decision 0018)
+
+
+def shape_features(
+    contour: NDArray[np.float64], times: NDArray[np.float64]
+) -> dict[str, float | None]:
+    """Pre-registered contour-shape features (decision 0018)."""
+    n = contour.size
+    if n < 5:
+        return dict.fromkeys(SHAPE, None)
+    m = float(np.median(contour))
+    e = max(1, round(0.1 * n))
+    onset = float(contour[:e].mean()) - m
+    offset = float(contour[-e:].mean()) - m
+    tau = np.linspace(-1, 1, n)
+    coef = np.polyfit(tau, contour, 2)
+    resid = contour - np.polyval(coef, tau)
+    smooth = ndimage.median_filter(contour, size=3, mode="nearest")
+    d = np.diff(smooth)
+    extrema = 0
+    last = smooth[0]
+    direction = 0
+    for i in range(1, n):  # count turning points with >= 1 kHz prominence
+        step = smooth[i] - last
+        if direction >= 0 and step <= -1.0:
+            extrema += direction > 0
+            direction, last = -1, smooth[i]
+        elif direction <= 0 and step >= 1.0:
+            extrema += direction < 0
+            direction, last = 1, smooth[i]
+        elif (direction > 0 and smooth[i] > last) or (direction < 0 and smooth[i] < last):
+            last = smooth[i]
+    del d
+    dur_ms = max((float(times[-1]) - float(times[0])) * 1000, 1e-6)
+    return {
+        "onset_sweep_khz": onset,
+        "offset_sweep_khz": offset,
+        "u_index_khz": (onset + offset) / 2,
+        "curvature_khz": float(coef[0]),
+        "fm_residual_sd_khz": float(resid.std()),
+        "fm_extrema_per_10ms": extrema / dur_ms * 10,
+    }
 
 
 def _window_max(
@@ -130,6 +179,7 @@ def call_features(
         "peak_snr_db": float(pw.max()),
         "mean_snr_db": float(pw.mean()),
         "n_contour_frames": len(f0),
+        **shape_features(contour, ts),
     }
 
 
@@ -230,7 +280,7 @@ def run_features(
         merged.append(
             {
                 **{k: v for k, v in c.items() if k not in FEATURES},
-                **{k: f.get(k) for k in FEATURES if k != "duration_ms"},
+                **{k: f.get(k) for k in (*FEATURES, *SHAPE) if k != "duration_ms"},
                 "duration_ms": c["duration_ms"],
                 "detector_peak_freq_khz": c["peak_freq_khz"],
                 "detector_peak_snr_db": c["peak_snr_db"],

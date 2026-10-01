@@ -163,3 +163,18 @@ def test_harmonic_unobservable_above_half_band():
     feats = _features_of(x.astype(np.float32))
     assert feats is not None and feats["harmonic_share"] is None
     assert feats["harmonic_observable_share"] == 0.0
+
+
+def test_shape_features_detect_u_shape_and_wobble():
+    from rat_usv.signal.features import shape_features
+
+    t = np.linspace(0, 0.1, 100)
+    tau = np.linspace(-1, 1, 100)
+    u = shape_features(40 + 6 * tau**2, t)
+    flat = shape_features(np.full(100, 40.0), t)
+    wobble = shape_features(40 + 2 * np.sin(2 * np.pi * 5 * tau), t)
+    assert u["u_index_khz"] > 3 and u["curvature_khz"] > 5
+    assert u["fm_extrema_per_10ms"] == pytest.approx(0.1)  # a U has one turning point
+    assert abs(flat["u_index_khz"]) < 1e-9 and flat["fm_residual_sd_khz"] < 1e-9
+    assert wobble["fm_extrema_per_10ms"] > 1.5 and wobble["fm_residual_sd_khz"] > 1.0
+    assert shape_features(np.array([40.0, 41.0]), t[:2])["u_index_khz"] is None
