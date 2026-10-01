@@ -205,21 +205,40 @@ def day_candidates(
 
 
 def age_trend(d: pd.DataFrame, col: str, litter_term: bool) -> dict[str, Any]:
-    """Random-intercept (pup) model of the standardised feature on age; slope in SD/day."""
+    """Random-intercept (pup) model of the standardised feature on age; slope in SD/day.
+
+    Fallbacks (decision 0021): a constant feature gives p = NaN (never significant); if the
+    mixed model is singular, OLS with pup-clustered standard errors is used instead.
+    """
     sub = d.dropna(subset=[col])
-    sub = sub.assign(y=(sub[col] - sub[col].mean()) / (sub[col].std() or 1.0))
+    sd = float(sub[col].std()) if len(sub) > 1 else 0.0
+    base = {"n_pup_days": int(len(sub)), "n_pups": int(sub["animal_id"].nunique())}
+    if not sd > 0:
+        return base | {"slope_sd_per_day": 0.0, "p": float("nan"), "model": "constant"}
+    sub = sub.assign(y=(sub[col] - sub[col].mean()) / sd)
     rhs = "age + C(sex)" + (" + C(litter_id)" if litter_term else "")
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        m = smf.mixedlm(f"y ~ {rhs}", sub, groups=sub["animal_id"]).fit(reml=True)
-    return {"slope_sd_per_day": float(m.params["age"]), "p": float(m.pvalues["age"]),
-            "n_pup_days": int(len(sub)), "n_pups": int(sub["animal_id"].nunique())}  # fmt: skip
+        try:
+            m = smf.mixedlm(f"y ~ {rhs}", sub, groups=sub["animal_id"]).fit(reml=True)
+            kind = "mixed"
+        except (np.linalg.LinAlgError, ValueError):
+            m = smf.ols(f"y ~ {rhs}", sub).fit(
+                cov_type="cluster", cov_kwds={"groups": pd.factorize(sub["animal_id"])[0]}
+            )
+            kind = "ols_cluster_pup"
+    return base | {"slope_sd_per_day": float(m.params["age"]), "p": float(m.pvalues["age"]),
+                   "model": kind}  # fmt: skip
 
 
 def bh(pvals: list[float]) -> list[bool]:
-    if not pvals:
-        return []
-    return [bool(x) for x in multipletests(pvals, alpha=FDR_Q, method="fdr_bh")[0]]
+    """Benjamini-Hochberg over the finite p-values; NaN is never significant."""
+    p = np.asarray(pvals, dtype=float)
+    out = np.zeros(p.size, dtype=bool)
+    ok = np.isfinite(p)
+    if ok.any():
+        out[ok] = multipletests(p[ok], alpha=FDR_Q, method="fdr_bh")[0]
+    return [bool(x) for x in out]
 
 
 def inner_gain(d: pd.DataFrame, base: list[str], extra: list[str]) -> float:
