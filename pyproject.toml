@@ -17,6 +17,9 @@ dependencies = [
     "soundfile>=0.13,<1",
     "scipy>=1.14,<2",
     "matplotlib>=3.9,<4",
+    "statsmodels>=0.14,<1",
+    "pandas>=2.2,<4",
+    "patsy>=1,<2",
 ]
 
 [project.scripts]
@@ -45,7 +48,7 @@ disallow_untyped_defs = true
 warn_unused_ignores = true
 
 [[tool.mypy.overrides]]
-module = ["pyarrow.*", "soundfile.*", "scipy.*", "matplotlib.*"]
+module = ["pyarrow.*", "soundfile.*", "scipy.*", "matplotlib.*", "statsmodels.*", "pandas.*", "patsy.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

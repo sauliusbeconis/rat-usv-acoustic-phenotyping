@@ -1,10 +1,15 @@
 # Next steps
 
-**Current milestone: M2 — classical phenotype + baseline** (see `docs/ROADMAP.md`).
+**Current milestone: M3 — splits and negative-control harness** (see `docs/ROADMAP.md`).
 
-M1 is done (decision 0008): detect run `.local/runs/20261001T103654.209131Z-detect-55e24631` (`calls.parquet`, `background_windows.parquet`, `recordings_detection.parquet`), hand-checked by the owner.
+Done: M1 (decision 0008) and M2 (decision 0009). Classical features and mixed-model trajectories are in `.local/runs/20261001T115113.379619Z-features-7b168652` and `.local/runs/20261001T120216.745814Z-baseline-0cbba073`.
 
-1. Per-call features from the audio of each detected call: fundamental-frequency contour (track f0, not the louder harmonic), duration, start/end/min/max/mean f0, bandwidth, slope, curvature/sinuosity, tonality, amplitude/SNR, harmonic presence, frequency-jump count; plus DeepSqueak-equivalent definitions for the M8 Fragile X comparison.
-2. Per animal-day summaries: call count and rate, inter-call intervals, bouts.
-3. Mixed-model age trajectories (animal random effect; sex; litter as a fixed effect or sensitivity) and individual-animal trajectory figures with CIs (evidence figures).
-4. Use `peak_snr_db >= 14` as the primary call set and all detections as a sensitivity analysis.
+1. Freeze animal-level splits: leave-one-animal-out (primary), plus leave-one-litter-out as a stress test. Store split files with SHA-256 digests.
+2. Build the control harness on M2 features and `background_windows.parquet`. Each control uses simple, fixed decoders (regularized linear/logistic, nested grouped CV), not a model-design choice:
+   - age from background-only audio (spectral summaries of call-free windows);
+   - age from SNR/amplitude-only features;
+   - calendar date vs age: the litters were born on different dates, so test whether date or age explains the features better;
+   - animal-ID and litter decodability from features;
+   - label permutation within the hierarchy.
+3. Verify the DeepSqueak-equivalent feature definitions against the DeepSqueak source before M8.
+4. **M4 starts with an explicit owner decision on model design** (AGENTS.md).

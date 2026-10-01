@@ -19,6 +19,7 @@ class ReferenceCall:
     start_s: float
     end_s: float
     label: str | None
+    peak_freq_khz: float | None = None  # Avisoft "peak freq(meanentire)"
 
 
 def _cells(data: bytes) -> list[dict[str, str | None]]:
@@ -52,6 +53,7 @@ def parse_export(data: bytes) -> list[ReferenceCall]:
     if "start time" not in column or "end time" not in column:
         raise ValueError("Not an Avisoft call export: missing start/end time columns")
     label_col = column.get("class") or column.get("label")
+    freq_col = column.get("peak freq(meanentire)")
     calls = []
     for row in rows[1:]:
         number = row.get(column.get("#", "A"))
@@ -60,9 +62,13 @@ def parse_export(data: bytes) -> list[ReferenceCall]:
         start, end = row.get(column["start time"]), row.get(column["end time"])
         if start is None or end is None:
             continue
+        freq = row.get(freq_col) if freq_col else None
         calls.append(
             ReferenceCall(
-                float(start) / 1000, float(end) / 1000, row.get(label_col) if label_col else None
+                float(start) / 1000,
+                float(end) / 1000,
+                row.get(label_col) if label_col else None,
+                float(freq) if freq is not None and freq not in ("_", "") else None,
             )
         )
     return calls

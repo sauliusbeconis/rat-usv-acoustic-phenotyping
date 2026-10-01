@@ -118,3 +118,48 @@ def test_score_review_shares_and_intervals():
     low, high = result["detector_only"]["ci95"]
     assert low < 2 / 3 < high
     assert result["empty"]["missing"] == 1 and result["empty"]["share_real_call"] is None
+
+
+def _features_of(x):
+    from rat_usv.signal.detect import whitened_spectrogram
+    from rat_usv.signal.features import call_features
+
+    cfg = DetectorConfig()
+    f, t, db = whitened_spectrogram(x, FS, cfg)
+    sel = (t >= 0.5) & (t <= 0.6)
+    return call_features((f / 1000).astype(np.float32), t[sel], db[:, sel], cfg)
+
+
+def test_fundamental_tracked_below_louder_harmonic():
+    rng = np.random.default_rng(0)
+    t = np.arange(int(1.0 * FS)) / FS
+    x = rng.normal(0, 0.01, t.size)
+    m = (t >= 0.5) & (t < 0.6)
+    x[m] += 0.03 * np.sin(2 * np.pi * 40_000 * t[m]) + 0.06 * np.sin(2 * np.pi * 80_000 * t[m])
+    feats = _features_of(x.astype(np.float32))
+    assert feats is not None
+    assert 38 < feats["f0_median_khz"] < 42
+    assert feats["harmonic_share"] > 0.8 and feats["n_jumps"] == 0
+
+
+def test_frequency_jump_counted_once():
+    rng = np.random.default_rng(0)
+    t = np.arange(int(1.0 * FS)) / FS
+    x = rng.normal(0, 0.01, t.size)
+    a = (t >= 0.5) & (t < 0.55)
+    b = (t >= 0.55) & (t < 0.6)
+    x[a] += 0.05 * np.sin(2 * np.pi * 40_000 * t[a])
+    x[b] += 0.05 * np.sin(2 * np.pi * 55_000 * t[b])
+    feats = _features_of(x.astype(np.float32))
+    assert feats is not None and feats["n_jumps"] == 1
+
+
+def test_harmonic_unobservable_above_half_band():
+    rng = np.random.default_rng(0)
+    t = np.arange(int(1.0 * FS)) / FS
+    x = rng.normal(0, 0.01, t.size)
+    m = (t >= 0.5) & (t < 0.6)
+    x[m] += 0.05 * np.sin(2 * np.pi * 60_000 * t[m])  # 2*f0 = 120 kHz, beyond the 100 kHz band
+    feats = _features_of(x.astype(np.float32))
+    assert feats is not None and feats["harmonic_share"] is None
+    assert feats["harmonic_observable_share"] == 0.0

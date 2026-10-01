@@ -26,8 +26,11 @@ from rat_usv.provenance.validation import (
 from rat_usv.qc.audio import audit as audit_wav
 from rat_usv.qc.full_decode import full_decode_pilot as run_full_decode
 from rat_usv.signal.detect import load_detector_config
+from rat_usv.signal.features import run_features
 from rat_usv.signal.pipeline import run_detection
 from rat_usv.signal.review import build_review, score_review
+from rat_usv.statistics.sanity import avisoft_sanity
+from rat_usv.statistics.trajectory import run_baseline
 from rat_usv.visualization.atlas import dataset_atlas as build_atlas
 
 app = typer.Typer(
@@ -298,6 +301,43 @@ def detect_score(config: ConfigArg, review_run: RunDir, labels: InputArg) -> Non
     write_json(out / "detection_check.json", result)
     record_run(out, "detect-score", cfg, [review_run / "review_items.json", labels])
     typer.echo(json.dumps(result, indent=1))
+    typer.echo(out)
+
+
+@app.command()
+def features(
+    config: ConfigArg,
+    detect_run: RunDir,
+    detector: InputArg = Path("configs/detection/default.yaml"),
+    workers: Annotated[int, typer.Option(min=1)] = 8,
+) -> None:
+    """M2: per-call fundamental-contour features and per animal-day summaries."""
+    cfg = load_config(config)
+    out = new_run(cfg, "features")
+    summary = run_features(cfg, load_detector_config(detector), detect_run, out, workers)
+    record_run(out, "features", cfg, [detector, detect_run / "calls.parquet"])
+    typer.echo(json.dumps(summary, indent=1))
+    typer.echo(out)
+
+
+@app.command()
+def baseline(config: ConfigArg, features_run: RunDir) -> None:
+    """M2: mixed-model age trajectories of classical animal-day features, with figures."""
+    cfg = load_config(config)
+    out = new_run(cfg, "baseline")
+    summary = run_baseline(features_run, out)
+    sanity = avisoft_sanity(cfg, features_run)
+    write_json(out / "avisoft_sanity.json", sanity)
+    record_run(out, "baseline", cfg, [features_run / "animal_day.parquet"])
+    typer.echo(json.dumps(sanity, indent=1))
+    for key, r in summary["results"].items():
+        if "error" in r:
+            typer.echo(f"{key}: FAILED {r['error']}")
+        else:
+            typer.echo(
+                f"{key}: n={r['n_animals']}/{r['n_animal_days']} age p={r['age_lrt_p']:.2g} "
+                f"ICC={r['animal_icc']:.2f}"
+            )
     typer.echo(out)
 
 
