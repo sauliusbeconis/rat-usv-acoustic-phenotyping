@@ -1,6 +1,6 @@
-# Scientific protocol — draft v0.2, not locked
+# Scientific protocol — v1 (locked 2026-10-01 before any M4 held-out comparison)
 
-Lock this protocol (dated, with its digest recorded) before the first M4 held-out comparison is run. Changes after locking need a dated decision note.
+Locked by owner decisions on 2026-10-01 (decision 0011); its SHA-256 is recorded in `protocol/LOCK.sha256`. Any change needs a dated decision note stating what M4 results had been seen.
 
 ## Context
 Bachelor's thesis, Vilnius University, Department of Neurobiology and Biophysics; supervisor Osvaldas Rukšėnas. The recordings were collected in the department's lab by a two-person team (the thesis author and B. Danilovaitė) and first analysed in B. Danilovaitė's bachelor's thesis, which is cited.
@@ -20,7 +20,9 @@ A retrospective observational cohort: 28 Wistar pups from 3 litters and 2 dams t
 
 ## Units and estimands
 - The animal is the independent unit; calls, bouts and animal-days are nested repeated observations. Report animal N and observation N separately.
-- **Primary estimand (H1):** in held-out animals (leave-one-animal-out), the improvement in recovering postnatal age at the animal-day level when the learned representation is added to classical features, compared with classical features alone. The learned comparator must include the AVA VAE baseline before any custom model is credited. Uncertainty comes from animal-level resampling. A difference counts only if its CI excludes zero and every M3 negative control stays at chance.
+- **Primary split (owner decision):** leave-one-litter-out, scored per pup. Every littermate shares every daily session, so the owner's "session-blocked leave-one-animal-out" is identical to training on the other two litters. Leave-one-animal-out is reported only as a session-leak-inflated upper bound, beside the background-only control (decision 0010).
+- **Primary estimand (H1):** the reduction in per-pup age MAE (days, at the animal-day level) when learned call embeddings are added to the M2 classical features, relative to classical features alone. Both use the same fixed decoder (median imputation + indicators, standardisation, ridge with inner grouped-CV alpha) under leave-one-litter-out. Encoders are fitted only on the training litters of each fold. Uncertainty comes from a pup-level bootstrap of paired MAE differences. H1 is supported only if the 95% CI excludes zero **and** the representation's background-window embeddings do not decode age across litters **and** the gain holds without `edit_suspected` recordings.
+- **Representation ladder (owner decision):** (1) AVA-style VAE (Goffinet et al. 2021), the required learned baseline; (2) small supervised CNN; (3) contrastive self-supervised encoder. A later rung is credited only if it beats the earlier rungs and the classical features under the primary split. Call embeddings are pooled per animal-day (mean and spread).
 - **H2 estimand:** consistency of held-out animals' trajectories in representation space (e.g. the age ordering of animal-day centroids, and the distance–age relationship), compared with univariate feature trajectories.
 
 ## Known confounds and limits
