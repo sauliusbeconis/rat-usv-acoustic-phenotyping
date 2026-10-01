@@ -442,5 +442,45 @@ def h2(
     typer.echo(out)
 
 
+@app.command()
+def explain(
+    config: ConfigArg,
+    m4_run: RunDir,
+    images_run: RunDir,
+    controls_run: RunDir,
+    features_run: RunDir,
+) -> None:
+    """M7 (needs `--group ml`): VAE call families, their acoustics, typical calls, explanatory test."""
+    from rat_usv.evaluation.explain import run_explain  # torch optional; import here
+
+    cfg = load_config(config)
+    out = new_run(cfg, "explain")
+    result = run_explain(m4_run, images_run, controls_run, features_run, out)
+    write_json(out / "explain_summary.json", result)
+    record_run(out, "explain", cfg, [controls_run / "splits.json"])
+    typer.echo(json.dumps(result, indent=1))
+    typer.echo(out)
+
+
+@app.command()
+def explorer(
+    config: ConfigArg,
+    m4_run: RunDir,
+    images_run: RunDir,
+    explain_run: RunDir,
+    litter: str = "E2L3",
+    points: Annotated[int, typer.Option(min=10)] = 300,
+) -> None:
+    """M7 exploratory explorer (needs `--group ml`): clickable latent map with spectrogram and audio."""
+    from rat_usv.visualization.explorer import build_explorer  # torch optional; import here
+
+    cfg = load_config(config)
+    out = new_run(cfg, "explorer")
+    result = build_explorer(cfg.source_root, m4_run, images_run, explain_run, litter, points, out)
+    write_json(out / "explorer_summary.json", result)
+    record_run(out, "explorer", cfg, [explain_run / "explain_summary.json"])
+    typer.echo(f"{result['points']} points -> {out / 'explorer.html'}")
+
+
 if __name__ == "__main__":
     app()
