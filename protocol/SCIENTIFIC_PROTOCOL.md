@@ -3,7 +3,7 @@
 Lock this protocol (dated, with its digest recorded) before the first M4 held-out comparison is run. Changes after locking need a dated decision note.
 
 ## Context
-Bachelor's thesis, Vilnius University, Department of Neurobiology and Biophysics; supervisor Osvaldas Ruksenas. The recordings were collected for an earlier bachelor's thesis in the same department and are reused with citation.
+Bachelor's thesis, Vilnius University, Department of Neurobiology and Biophysics; supervisor Osvaldas Rukšėnas. The recordings were collected in the department's lab by a two-person team (the thesis author and B. Danilovaitė) and first analysed in B. Danilovaitė's bachelor's thesis, which is cited.
 
 ## Question
 Can the multidimensional acoustic structure of rat pup USVs (spectrotemporal morphology, timing, sequence organization) capture postnatal development more completely than conventional summary variables? See `docs/RESEARCH_CONTEXT.md`.
@@ -13,7 +13,7 @@ Can the multidimensional acoustic structure of rat pup USVs (spectrotemporal mor
 - **H2:** development is a structured trajectory through a latent acoustic space, not a set of independent univariate changes.
 - **H2b:** the acoustic state tracks physical maturation (body weight) beyond chronological age; tested within age with animal-level models.
 - **H3:** temporal organization (intervals, bouts, transitions, entropy) adds information beyond single-call morphology.
-- **H4 (future):** learned representations transfer to unseen animals, then to independent cohorts and perturbations.
+- **H4 (planned, needs new data):** learned representations transfer to an independent cohort, and a pharmacological or disease-model perturbation displaces animals in the same acoustic state space. An external or drug-treated cohort will be obtained (roadmap M8).
 
 ## Design (reconstructed, M0)
 A retrospective observational cohort: 28 Wistar pups from 3 litters and 2 dams that shared a cage. Each pup was recorded daily for 5 min in isolation on a heated pad, P1–P21 (P0 = written birth date), then weighed. 574 pup recordings. There is no experimental manipulation; age is the only designed factor. Sex and weight are measured covariates.

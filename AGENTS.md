@@ -1,7 +1,7 @@
 # Agent guide
 
 ## Goal
-Bachelor's thesis (Vilnius University, Department of Neurobiology and Biophysics; supervisor Osvaldas Ruksenas): results must be thesis-ready, i.e. clear methods, figures and honest limits.
+Bachelor's thesis (Vilnius University, Department of Neurobiology and Biophysics; supervisor Osvaldas Rukšėnas): results must be thesis-ready, i.e. clear methods, figures and honest limits.
 
 Test whether the multidimensional structure of rat pup USVs (call morphology, timing, sequences) captures postnatal development (P1–P21) **beyond conventional summary variables**, as a reproducible trajectory through an acoustic state space that holds for unseen animals. Age prediction is a validation task, not the goal. Full brief: `docs/RESEARCH_CONTEXT.md` (read it once). Plan and current milestone: `docs/ROADMAP.md`.
 
