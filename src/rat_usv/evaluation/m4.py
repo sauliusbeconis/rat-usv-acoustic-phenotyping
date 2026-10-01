@@ -169,3 +169,75 @@ def run_m4(
     write_json(out / f"m4_{kind}_summary.json", result_summary)
     write_json(out / "training_history.json", histories)
     return result_summary
+
+
+RICH_FEATURES = (
+    "duration_ms", "f0_median_khz", "f0_min_khz", "f0_max_khz", "f0_sd_khz", "bandwidth_khz",
+    "slope_khz_per_s", "sinuosity", "tonality", "harmonic_share", "f0_start_khz", "f0_end_khz",
+)  # fmt: skip
+
+
+def rich_classical(call_features: pd.DataFrame) -> pd.DataFrame:
+    """Secondary baseline: per animal-day 10/50/90th percentiles of classical call features,
+    plus jump and short-call proportions (confident calls only). No fitted statistics."""
+    c = call_features[call_features["confident"]]
+    g = c.groupby("wav_path")
+    parts = [
+        g[f].quantile(q).rename(f"q{int(q * 100)}_{f}")
+        for f in RICH_FEATURES
+        for q in (0.1, 0.5, 0.9)
+    ]
+    parts.append(g["n_jumps"].apply(lambda s: float((s > 0).mean())).rename("share_with_jump"))
+    parts.append(
+        g["duration_ms"].apply(lambda s: float((s < 10).mean())).rename("share_short_lt10ms")
+    )
+    return pd.concat(parts, axis=1)
+
+
+def rich_baseline_rerun(
+    m4_run: Path, images_run: Path, controls_run: Path, features_run: Path
+) -> dict[str, Any]:
+    """Reuse a finished M4 run's saved encoders; compare rich classical vs rich classical + learned."""
+    summary = json.loads(next(m4_run.glob("m4_*_summary.json")).read_text())
+    kind = summary["rung"]
+    digest = (controls_run / "splits.sha256").read_text().split()[0]
+    splits = load_splits(controls_run / "splits.json", digest)
+    m3 = json.loads((controls_run / "controls_summary.json").read_text())
+    birth = {k: pd.Timestamp(v).date() for k, v in m3["birth_dates"].items()}
+    day = add_derived(pd.read_parquet(controls_run / "animal_day_with_background.parquet"), birth)
+    classical = feature_sets(day, [])["classical"]
+    rich = rich_classical(pd.read_parquet(features_run / "call_features.parquet"))
+    day = day.merge(rich, left_on="wav_path", right_index=True, how="left")
+    rich_cols = classical + list(rich.columns)
+    call_idx = pq.read_table(images_run / "calls_index.parquet").to_pandas()
+    images = np.asarray(np.load(images_run / "calls_images.npy", mmap_mode="r"))
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    preds = {k: np.full(len(day), np.nan) for k in ("rich", "rich_combined")}
+    for fold in splits["leave_one_litter_out"]:
+        litter = fold["litter"]
+        state = torch.load(m4_run / f"{kind}_holdout_{litter}.pt", map_location=device)
+        if kind == "vae":
+            model = vae.VAE().to(device)
+            model.load_state_dict(state)
+            z = vae.embed(model, images, device)
+        else:
+            enc = encoders.Encoder().to(device)
+            enc.load_state_dict(state)
+            z = encoders.embed_encoder(enc, images, device)
+        emb = pooled(call_idx, z)
+        d = day.merge(emb, left_on="wav_path", right_index=True, how="left")
+        test = (d["litter_id"] == litter).to_numpy()
+        preds["rich"][test] = fit_predict(d[~test], d[test], rich_cols)
+        preds["rich_combined"][test] = fit_predict(d[~test], d[test], rich_cols + list(emb.columns))
+    scored = day[["animal_id", "age"]].copy()
+    for k, v in preds.items():
+        scored[f"pred_{k}"] = v
+    mae = {k: per_pup_mae(scored, f"pred_{k}") for k in preds}
+    rng = np.random.default_rng(0)
+    return {
+        "m4_run": m4_run.name, "rung": kind, "seed": summary["encoder"]["seed"],
+        "n_rich_features": len(rich_cols),
+        "per_pup_mae_days": {k: round(float(v.mean()), 3) for k, v in mae.items()},
+        "rich_minus_rich_combined": paired_bootstrap(mae["rich"], mae["rich_combined"], rng),
+        "analysis": "secondary (not the locked primary estimand)",
+    }  # fmt: skip

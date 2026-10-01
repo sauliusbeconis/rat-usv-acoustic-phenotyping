@@ -1,11 +1,11 @@
 # Next steps
 
-**Current milestone: M4 — representation ladder, overnight training launched 2026-10-01 ~16:04 local** (decisions 0011, 0012).
+**Current milestone: finishing M4 (H2), then M5 and M7** (see `docs/ROADMAP.md`).
 
-The overnight chain (`.local/setup/overnight_m4.sh`, detached) runs VAE (40 epochs), CNN (30) and contrastive SSL (60) for seeds 0, 1 and 2 under leave-one-litter-out. Each run writes `.local/runs/*-m4-{kind}-*/m4_{kind}_summary.json`. When all 9 finish, the table is collected into `.local/runs/m4_overnight_table.json`.
+M4/H1 done (decision 0013): learned call embeddings add age information beyond classical features under leave-one-litter-out (VAE +0.66 d, CNN +1.04 d over VAE+classical baseline chain; SSL not credited). Runs: `.local/runs/m4_overnight_table.json`, `.local/runs/m4_rich_baseline_secondary.json`.
 
-In the morning:
-1. Check `.local/runs/overnight_m4_*.log` for `ALL DONE` and any non-zero `exit`.
-2. Read `m4_overnight_table.json`. For each rung and seed: per-pup MAE (classical, learned, combined), the primary gain (classical − combined) with pup-bootstrap CI, the background-embedding control, and the H1 criteria from protocol v1.
-3. Write the M4 decision note: report all seeds, credit a rung only if it beats the earlier rungs and the classical features, and state H1 status. Then present results to the owner before M5.
-4. Still open: verify the DeepSqueak-equivalent features (M8 prerequisite).
+1. **H2 (protocol estimand):** trajectory consistency of held-out pups in representation space. Use the VAE (unsupervised; age never seen in training) as the primary space and the CNN as secondary: the age ordering of animal-day centroids, the distance–age relationship, compared with univariate classical trajectories.
+2. **H2b:** does the acoustic state track body weight beyond age? Use within-age, animal-level models on embeddings and classical features.
+3. **M7 explanation chain:** which call types or acoustic properties drive the learned gain. Show nearest real calls and spectrograms per latent direction, and build an exploratory explorer.
+4. **M5:** temporal organisation (bouts, transitions); start with order-shuffle ablations.
+5. Before M8: verify the DeepSqueak-equivalent features; the Fragile X test is feature-level only.
