@@ -179,7 +179,7 @@ def _traversal(
     w = ridge.coef_ / scale  # direction in raw latent units
     w = w / np.linalg.norm(w)
     proj = z @ w
-    steps = np.linspace(-2, 2, 7) * proj.std()
+    steps = np.linspace(-3, 3, 7) * proj.std()
     out = []
     for f in range(int(np.nanmax(family)) + 1):
         sel = family == f
@@ -250,16 +250,22 @@ def _figures(t: pd.DataFrame, traversals: dict[str, np.ndarray], out: Path) -> N
     fig.savefig(out / "m9_occlusion_regions.png", dpi=150)
     plt.close(fig)
     for litter, imgs in traversals.items():
-        n_f, n_s = imgs.shape[:2]
-        fig, axes = plt.subplots(n_f, n_s, figsize=(n_s * 1.1, n_f * 1.1), squeeze=False)
+        n_f = imgs.shape[0]
+        show = [0, imgs.shape[1] // 2, imgs.shape[1] - 1]
+        fig, axes = plt.subplots(n_f, 4, figsize=(4 * 1.3, n_f * 1.2), squeeze=False)
         for i in range(n_f):
-            for j in range(n_s):
-                axes[i, j].imshow(imgs[i, j], cmap="magma", vmin=0, vmax=1)
-                axes[i, j].axis("off")
-        fig.suptitle(
-            f"Latent traversal along residual-age direction (fold {litter}); left = younger, right = older",
-            fontsize=8,
-        )
+            for j, k in enumerate(show):
+                axes[i, j].imshow(imgs[i, k], cmap="magma", vmin=0, vmax=1)
+            diff = imgs[i, -1] - imgs[i, 0]
+            lim = max(float(np.abs(diff).max()), 1e-3)
+            axes[i, 3].imshow(diff, cmap="RdBu_r", vmin=-lim, vmax=lim)
+            for ax in axes[i]:
+                ax.set_xticks([])
+                ax.set_yticks([])
+            axes[i, 0].set_ylabel(f"family {i}", fontsize=6)
+        for j, t in enumerate(("younger (−3 SD)", "centre", "older (+3 SD)", "older − younger")):
+            axes[0, j].set_title(t, fontsize=7)
+        fig.suptitle(f"Decoded calls along the residual-age direction (fold {litter})", fontsize=8)
         fig.tight_layout()
         fig.savefig(out / f"m9_traversal_{litter}.png", dpi=120)
         plt.close(fig)

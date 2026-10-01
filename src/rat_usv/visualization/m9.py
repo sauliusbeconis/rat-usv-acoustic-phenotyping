@@ -19,7 +19,7 @@ BLOCK_LABELS = {"f0_modes": "f0 shape modes (fPCA)", "env_modes": "Loudness-enve
 
 
 def label(f: str) -> str:
-    return (f.replace("_med", "").replace("f0m_", "f0 mode ").replace("envm_", "envelope mode ")
+    return (f.removesuffix("_med").replace("f0m_", "f0 mode ").replace("envm_", "envelope mode ")
             .replace("var_within_family_", "within-family variability of ").replace("var_", "variability of ")
             .replace("share_", "share of calls with ").replace("_", " "))  # fmt: skip
 
@@ -85,7 +85,7 @@ def confirmation_heatmap(run: Path, out: Path) -> None:
                 mat[i, j] = v["slope"]
                 status[i, j] = 2 if v["confirmed"] else 1
     lim = np.nanmax(np.abs(mat)) or 1
-    fig, ax = plt.subplots(figsize=(6.2, 0.28 * len(feats) + 1.6))
+    fig, ax = plt.subplots(figsize=(7.4, 0.28 * len(feats) + 1.6))
     im = ax.imshow(mat, cmap="RdBu_r", vmin=-lim, vmax=lim, aspect="auto")
     for (i, j), s in np.ndenumerate(status):
         ax.text(j, i, {0: "–", 1: "·", 2: "✓"}[s], ha="center", va="center", fontsize=9)
