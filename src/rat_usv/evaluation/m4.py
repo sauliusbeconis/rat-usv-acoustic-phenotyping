@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 import torch
+from sklearn.model_selection import GroupKFold
 
 from rat_usv.evaluation.controls import add_derived, feature_sets, regressor
 from rat_usv.evaluation.splits import load_splits
@@ -34,6 +35,9 @@ def pooled(index: pd.DataFrame, z: np.ndarray, key: str = "wav_path") -> pd.Data
 
 def fit_predict(train: pd.DataFrame, test: pd.DataFrame, cols: list[str]) -> np.ndarray:
     model = regressor()
+    n_groups = train["animal_id"].nunique()
+    if n_groups < 5:  # inner tuning folds cannot exceed the number of training pups
+        model.set_params(cv=GroupKFold(n_groups))
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         model.fit(
