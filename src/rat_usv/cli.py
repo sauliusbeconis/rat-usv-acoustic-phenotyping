@@ -482,5 +482,26 @@ def explorer(
     typer.echo(f"{result['points']} points -> {out / 'explorer.html'}")
 
 
+@app.command()
+def landscape(
+    config: ConfigArg,
+    m4_run: RunDir,
+    images_run: RunDir,
+    controls_run: RunDir,
+    features_run: RunDir,
+    explain_run: RunDir,
+) -> None:
+    """M7 (needs `--group ml`): latent-property links, within-family age signal, landscape figures."""
+    from rat_usv.evaluation.latent_links import run_links, write_summary  # torch optional
+
+    cfg = load_config(config)
+    out = new_run(cfg, "landscape")
+    summary = run_links(m4_run, images_run, controls_run, features_run, explain_run, out)
+    write_summary(summary, out)
+    record_run(out, "landscape", cfg, [controls_run / "splits.json"])
+    typer.echo(json.dumps(summary, indent=1))
+    typer.echo(out)
+
+
 if __name__ == "__main__":
     app()
