@@ -1,6 +1,6 @@
 # 0019 — H-M7a results (pre-registered in decision 0018)
 
-Date: 2026-10-01. Run `.local/runs/20261001T165708.850941Z-shape-test-fd6e9c44` (`usv shape-test`); shape features from features run `20261001T*-features-*` (the run that includes `SHAPE`). Analysis exactly as pre-registered; post-hoc rows are labelled.
+Date: 2026-10-01. Run `.local/runs/20261001T165708.850941Z-shape-test-fd6e9c44` (`usv shape-test`); shape features from features run `20261001T164535.599872Z-features-c17ba600`. Analysis exactly as pre-registered; post-hoc rows are labelled.
 
 ## Test A — this cohort (hypothesis-informed, not independent)
 - **A1 (direction): supported, 3 of 3.** Per pup-day medians rise with age: U-index +0.021 kHz/day (p = 6×10⁻¹⁴), FM residual SD +0.030 kHz/day (p = 2×10⁻¹⁷), FM turning points +0.0066 per 10 ms per day (p = 2×10⁻¹⁵); 494 pup-days, 28 pups.
