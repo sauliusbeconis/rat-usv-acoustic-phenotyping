@@ -32,7 +32,7 @@ Unit and statistics as protocol v1: pup-day aggregates; mixed models with a rand
 | 4 | **Discovery/confirmation runner**: rotation loop, locked predictions with digest, FDR, confirmation table | `m9_confirmation.json` | ~1 h |
 | 5 | **Residual attribution (Q4)**: occlusion maps of the VAE age score on call images (start/middle/end × fundamental/harmonic bands), averaged per family and age band; latent traversal images along the age direction at fixed family | maps, montages | ~1 h |
 | 6 | **Biological contrasts (Q5)**: sex × age interactions on confirmed features; individual-identity decodability by age band (train/test on different days within band) | tables, figures | ~45 min |
-| 7 | Decision note (results), roadmap update, figure registry entries | docs | ~30 min |
+| 7 | Decision note (results), roadmap update, figure registry entries; **private results page** `private/results/M9_findings.html` with a figure and a plain-language explanation per finding (owner request) | docs, report | ~45 min |
 
 Total: about one working day; GPU only for package 5 (minutes).
 

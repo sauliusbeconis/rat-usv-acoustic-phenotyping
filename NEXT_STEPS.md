@@ -10,6 +10,8 @@ Inputs (all private, `.local/runs/`):
 - call images `20261001T124005.643225Z-call-images-c60840b7`
 - M4 table `m4_overnight_table.json` (VAE seed 0–2 runs); explain run `20261001T153401.888949Z-explain-1a8315ae`
 
+Working mode (owner, 2026-10-01): run all packages to the end without stopping; at any choice take the "(Recommended)" option and log it; new model-architecture design still needs owner approval. **Finish with a private results page** (`private/results/M9_findings.html`): a figure per finding, a plain-language explanation, enthusiasm only for findings confirmed under the rules below, and honest notes on nulls and limits.
+
 Rules: discovery code must never load the held-out (confirmation) litter; lock and hash predictions before confirmation; FDR q = 0.05; confirmed = ≥ 2 of 3 rotations; baseline = classical + six H-M7a shape features.
 
 ## Status so far
