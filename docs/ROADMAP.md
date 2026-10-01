@@ -29,17 +29,20 @@ An exploratory explorer (M7 style) may be built right after M1 to help look at t
 ## Positioning (literature check 2026-10-01)
 Already established: USVs change with age (rat isolation calls peak around P7–11; frequency falls with growth); learned VAE spaces beat hand-picked features (Goffinet et al. 2021, eLife 10:e67855); mouse pup ages separate in VAE space (PMC9805956); rat pup VAE clusters and syntax in a disease model at P6/9/12 (Sci Rep 2025, PMC12304202). Our distinct contribution: **daily P1–P21 sampling of identified individuals with weights**, a held-out-animal, control-backed test of information beyond strong classical features, and whether acoustic state tracks physical maturation (weight) beyond chronological age. Main risk: few calls on late days (heated chamber, natural decline after the second week).
 
-## External data (M8 candidates, checked 2026-10-01)
-| Dataset | Content | Use |
+## External data (M8 candidates; owner-supplied list, checked 2026-10-01)
+| Dataset | Verified content | Use |
 |---|---|---|
-| Fragile X rat model, developmental USV trajectory ([Zenodo 10.5281/zenodo.20940043](https://zenodo.org/records/20940043), CC BY 4.0, June 2026) | One call-level CSV (3.1 MB), **no audio** | Best match for H4: a disease-model developmental trajectory. Feature-level test only, unless the authors share audio |
-| USCMed rat USVs ([Zenodo 10.5281/zenodo.15011554](https://zenodo.org/records/15011554), CC BY 4.0) | 1.1 TB adult rat audio with hand-scored annotations (fear paradigm; login required) | Not developmental; useful as an independent **detector benchmark** for M1 |
-| USVSEG dataset (Zenodo, via [PLOS ONE 2020](https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0228907)) | Segmented syllable WAVs, including mouse pup isolation calls | Detector benchmark; cross-species sanity check |
-| [mouseTube](https://pmc.ncbi.nlm.nih.gov/articles/PMC5081159/) | Open mouse USV recordings with metadata (strain, age, protocol) | Cross-species transfer of the representation (weaker than rat) |
+| **Fragile X rat pups**, Fmr1 KO vs WT ([Zenodo 20940043](https://zenodo.org/records/20940043), CC BY 4.0) | *Checked:* one DeepSqueak call table, 9,495 accepted calls, 33 pups (17 WT, 16 KO), P3/P6/P10/P14/P21 (not every pup on every day; only 8 and 6 pups have calls at P14 and P21). Per call: begin/end time, 14 DeepSqueak features, call label, genotype. **No audio.** Some pup IDs (e.g. `lb`) may be reused across litters and need checking against file names | **Primary H4 test** at the classical-feature and timing level: transfer our developmental model to WT pups and test KO displacement. Requires our M2 features to include DeepSqueak-equivalent definitions |
+| **USCMed** adult male rats, fear context ([Zenodo 15029872](https://zenodo.org/records/15029872), open, 5.95 GB zip; later versions restricted) | *Checked:* open raw-audio archive with hand-scored annotations (27 rats) | M1 detector validation on independent raw audio; robustness of representations to another lab and recording setup |
+| **mouseTube rat benchmark**, Rat 16 Conditioning ([Zenodo 20626750](https://zenodo.org/records/20626750), CC BY 4.0) | *Checked:* one 90 MB WAV (300 kHz, Avisoft) with two independent manual annotations plus outputs from Avisoft, DeepSqueak, RatRec, SonoTrack, USVSEG and the LMT USV Toolbox | M1 detector benchmark and inter-annotator agreement reference |
+| Mahler Lab NAc amphetamine + DREADD/CNO (GitHub `USVs.csv`, ~77k calls) | *Not yet checked:* reported as a DeepSqueak call table with manual categories; adult Long-Evans; no WAVs | Feature-level pharmacology (adult 50-kHz calls); outside the developmental core |
+| Banjac et al. 2026, amphetamine/morphine in WKY vs Wistar (Uni Ljubljana repository, CC BY 4.0) | *Not yet checked:* reported as XLSX tables, no WAVs | Feature-level drug × disease-model test in adults; outside the developmental core |
+| Shank3 rats, TrackUSF (Mendeley Data 10.17632/8d4yz5fyhy.2, CC BY 4.0) | *Not yet checked:* reported as processed TrackUSF outputs | Disease-model phenotype space in adults; low priority |
 
-No public raw-audio rat pup drug or disease-model dataset was found in this search. Still to check: OSF, Dryad, Figshare, and the data statements of rat pup valproate, poly(I:C), chlorpyrifos and MAM studies. Asking authors to share deposited audio counts as using existing data, not a new experiment.
+Adult pharmacology datasets measure a different call type (adult 50-kHz calls versus pup isolation calls), so transferring a pup developmental state space to them is a separate, weaker claim. They are optional for the thesis.
 
 ## Owner decisions still open
-- **M8 data choice:** pick the external dataset(s) from the table above, and decide whether to ask the Fragile X authors (Auerbach lab, UIUC) for audio. Agree with the supervisor.
+- **M8 data choice:** the Fragile X table is the primary external test; decide with the supervisor whether to ask its authors (Auerbach lab, UIUC) for audio, which would allow representation-level transfer.
+- **Model design (M4–M6) is an explicit owner decision.** Agents propose options with trade-offs and wait for the owner's choice before implementing any model architecture.
 - Dataset release: the data were collected by the thesis author and B. Danilovaitė together; cite her thesis and agree any public release with her and the supervisor.
 

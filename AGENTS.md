@@ -18,6 +18,7 @@ The dataset is reconstructed and frozen. Load it with `rat_usv.data.linkage.load
 ## How to work
 - Work milestone by milestone from `docs/ROADMAP.md`. Each milestone has a concrete output and a done-criterion; finish it, validate it, then update the roadmap status.
 - Decide technical choices yourself (libraries, parameters, file formats, code structure) and record them in the run or a short decision note. Ask the owner only about genuine scientific trade-offs, batched into one question.
+- **Exception: model design.** Before choosing or implementing any representation or model architecture (M4–M6), stop and present the options with trade-offs to the owner explicitly. Implement only the option they choose.
 - Prefer simple, working code over infrastructure. Python 3.12, `uv`, typed code in `src/rat_usv/`, synthetic data only in tests. Notebooks are for exploration; logic that matters moves into `src/`.
 - Every experiment run directory records the git commit, config, split, seed, metrics, predictions and figures (`rat_usv.provenance.io.new_run`).
 - Check: `uv run --frozen ruff check . && uv run --frozen ruff format --check . && uv run --frozen mypy && uv run --frozen pytest`.
