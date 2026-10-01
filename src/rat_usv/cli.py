@@ -503,5 +503,28 @@ def landscape(
     typer.echo(out)
 
 
+@app.command()
+def temporal(
+    config: ConfigArg,
+    m4_table: InputArg,
+    images_run: RunDir,
+    controls_run: RunDir,
+    compact: Annotated[bool, typer.Option(help="Post-hoc compact sequence set")] = False,
+) -> None:
+    """M5/H3 (needs `--group ml`): timing and call-order features vs shuffled order (VAE runs)."""
+    from rat_usv.evaluation.temporal import run_temporal  # torch optional; import here
+
+    cfg = load_config(config)
+    runs = [
+        cfg.output_root / r["run"] for r in json.loads(m4_table.read_text()) if r["rung"] == "vae"
+    ]
+    out = new_run(cfg, "temporal")
+    result = run_temporal(runs, images_run, controls_run, compact=compact)
+    write_json(out / "temporal_summary.json", result)
+    record_run(out, "temporal", cfg, [m4_table, controls_run / "splits.json"])
+    typer.echo(json.dumps(result, indent=1))
+    typer.echo(out)
+
+
 if __name__ == "__main__":
     app()
