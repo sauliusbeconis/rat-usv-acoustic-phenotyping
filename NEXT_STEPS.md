@@ -1,15 +1,10 @@
 # Next steps
 
-**Current milestone: M3 — splits and negative-control harness** (see `docs/ROADMAP.md`).
+**Current milestone: M4, waiting on two owner decisions** (see `docs/ROADMAP.md` → *Owner decisions*).
 
-Done: M1 (decision 0008) and M2 (decision 0009). Classical features and mixed-model trajectories are in `.local/runs/20261001T115113.379619Z-features-7b168652` and `.local/runs/20261001T120216.745814Z-baseline-0cbba073`.
+Done: M1 (0008), M2 (0009), M3 (0010). Inputs for M4: detect run `20261001T103654.209131Z-detect-55e24631`, features `20261001T115113.379619Z-features-7b168652`, controls and frozen splits `20261001T122013.275165Z-controls-c4cf4161`.
 
-1. Freeze animal-level splits: leave-one-animal-out (primary), plus leave-one-litter-out as a stress test. Store split files with SHA-256 digests.
-2. Build the control harness on M2 features and `background_windows.parquet`. Each control uses simple, fixed decoders (regularized linear/logistic, nested grouped CV), not a model-design choice:
-   - age from background-only audio (spectral summaries of call-free windows);
-   - age from SNR/amplitude-only features;
-   - calendar date vs age: the litters were born on different dates, so test whether date or age explains the features better;
-   - animal-ID and litter decodability from features;
-   - label permutation within the hierarchy.
-3. Verify the DeepSqueak-equivalent feature definitions against the DeepSqueak source before M8.
-4. **M4 starts with an explicit owner decision on model design** (AGENTS.md).
+1. Owner decides the primary evaluation split (session leak, decision 0010).
+2. Owner chooses the M4 model design from presented options; AVA VAE is the required learned baseline.
+3. Lock `protocol/SCIENTIFIC_PROTOCOL.md` (estimand, split, metrics, controls) before the first M4 held-out comparison.
+4. Still open from M2: verify the DeepSqueak-equivalent feature definitions before M8.

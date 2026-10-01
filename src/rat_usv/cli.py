@@ -11,6 +11,7 @@ from rat_usv.config import load_config
 from rat_usv.data.crosswalk import seed_crosswalk
 from rat_usv.data.inventory import inventory as build_inventory
 from rat_usv.data.linkage import check_sources, load_recordings, summarize
+from rat_usv.evaluation.run import run_m3
 from rat_usv.evidence.pilot import extract_pilot, validate_bundle_file
 from rat_usv.evidence.reconcile import reconcile_metadata as reconcile_records
 from rat_usv.evidence.review import review_packet as build_review_packet
@@ -338,6 +339,35 @@ def baseline(config: ConfigArg, features_run: RunDir) -> None:
                 f"{key}: n={r['n_animals']}/{r['n_animal_days']} age p={r['age_lrt_p']:.2g} "
                 f"ICC={r['animal_icc']:.2f}"
             )
+    typer.echo(out)
+
+
+@app.command()
+def controls(
+    config: ConfigArg,
+    features_run: RunDir,
+    detect_run: RunDir,
+    permutations: Annotated[int, typer.Option(min=0)] = 100,
+    workers: Annotated[int, typer.Option(min=1)] = 8,
+) -> None:
+    """M3: freeze animal/litter splits and run negative controls on animal-day features."""
+    cfg = load_config(config)
+    out = new_run(cfg, "controls")
+    result = run_m3(cfg, features_run, detect_run, out, permutations, workers)
+    record_run(out, "controls", cfg, [features_run / "animal_day.parquet", out / "splits.json"])
+    for name, r in result["age_decoding_loao"].items():
+        typer.echo(
+            f"LOAO {name}: MAE {r['mae_days']} {r['mae_ci95']} null {r['permutation_null_mae_mean']} p={r['permutation_p']:.3f}"
+        )
+    for name, r in result["age_decoding_lolo"].items():
+        typer.echo(f"LOLO {name}: MAE {r['mae_days']} bias {r['bias_by_held_out_litter']}")
+    typer.echo(
+        json.dumps(
+            {"date_vs_age": result["date_vs_age"], "identity": result["identity_decoding"]},
+            indent=1,
+        )
+    )
+    typer.echo(f"splits sha256 {result['splits_sha256']}")
     typer.echo(out)
 
 
