@@ -467,9 +467,7 @@ def identity_by_band(
     c["band"] = pd.cut(c["age"], [0, 7, 14, 21], labels=list(AGE_BANDS))
     sizes = c.groupby("wav_path")["age"].transform("size")
     c = c[sizes >= MIN_CALLS_VAR]
-    c = c.groupby("wav_path", group_keys=False).apply(
-        lambda d: d.sample(min(len(d), CALLS_PER_PUP_DAY), random_state=seed), include_groups=True
-    )
+    c = c.sample(frac=1.0, random_state=seed).groupby("wav_path").head(CALLS_PER_PUP_DAY)
 
     def score(d: pd.DataFrame, labels: np.ndarray) -> float:
         pred = np.empty(len(d), dtype=object)
