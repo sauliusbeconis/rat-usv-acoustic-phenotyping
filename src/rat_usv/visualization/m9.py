@@ -188,7 +188,7 @@ def identity_figure(run: Path, out: Path) -> None:
 def example_calls(
     run: Path, images_run: Path, features_run: Path, feature: str, out: Path, rotation: str = "E2L2"
 ) -> None:
-    """Real call spectrograms at the low and high end of one per-call score (held-out litter)."""
+    """Typical real calls with low (5-15th pct) and high (85-95th pct) per-call scores."""
     from rat_usv.evaluation.m9 import beyond_contour, load_calls, project
 
     calls, curves = load_calls(features_run)
@@ -208,10 +208,9 @@ def example_calls(
         score = beyond_contour(calls, curves)[name.replace("share_", "has_")].to_numpy()
     pos["score"] = score[pos["k"].to_numpy()]
     pos = pos[pos["litter_id_x"] == rotation].dropna(subset=["score"])
-    lo, hi = (
-        pos.nsmallest(400, "score").sample(8, random_state=0),
-        pos.nlargest(400, "score").sample(8, random_state=0),
-    )
+    q = pos["score"].quantile([0.05, 0.15, 0.85, 0.95]).to_numpy()
+    lo = pos[pos["score"].between(q[0], q[1])].sample(8, random_state=0)
+    hi = pos[pos["score"].between(q[2], q[3])].sample(8, random_state=0)
     fig, axes = plt.subplots(2, 8, figsize=(12, 3.4))
     for r, (title, sel) in enumerate((("low", lo), ("high", hi))):
         for c, (_, row) in enumerate(sel.iterrows()):
@@ -222,6 +221,6 @@ def example_calls(
             ax.set_title(f"P{int(row['postnatal_age_days_x'])}", fontsize=7)
         axes[r, 0].set_ylabel(f"{title} score", fontsize=8)
     fig.suptitle(
-        f"Real calls (held-out {rotation}) at the extremes of {label(feature)}", fontsize=10
+        f"Typical real calls (litter {rotation}) with low vs high {label(feature)}", fontsize=10
     )
     _save(fig, out)

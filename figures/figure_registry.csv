@@ -1,1 +1,9 @@
 figure_id,category,claim_id,run_id,dataset_hash,split_hash,code_commit,config_hash,script,output_path,uncertainty,review_status
+M9-01,evidence,M9-Q1-shape-vocabulary,20261001T181436.048902Z-m9-5a678459,,67b01844307763c2,3d975b1,,rat_usv.visualization.m9.modes_figure,private/results/M9/modes_f0.png,mode stability across 3 rotations,draft
+M9-02,evidence,M9-Q2-age-trends,20261001T181436.048902Z-m9-5a678459,,67b01844307763c2,3d975b1,,rat_usv.visualization.m9.confirmation_heatmap,private/results/M9/confirmation.png,BH q=0.05 per rotation; >=2 of 3,draft
+M9-03,evidence,M9-Q2-added-information,20261001T181436.048902Z-m9-5a678459,,67b01844307763c2,3d975b1,,rat_usv.visualization.m9.gain_forest,private/results/M9/gains.png,pup bootstrap 95% CI,draft
+M9-04,evidence,M9-Q2-age-trends,20261001T181436.048902Z-m9-5a678459,,67b01844307763c2,3d975b1,,rat_usv.visualization.m9.trend_panels,private/results/M9/trends_shape.png,per-pup lines,draft
+M9-05,evidence,M9-Q3-variability,20261001T181436.048902Z-m9-5a678459,,67b01844307763c2,3d975b1,,rat_usv.visualization.m9.trend_panels,private/results/M9/trends_variability.png,per-pup lines,draft
+M9-06,illustration,M9-Q2-age-trends,20261001T181436.048902Z-m9-5a678459,,,3d975b1,,rat_usv.visualization.m9.example_calls,private/results/M9/examples_f0_P1.png,typical calls (5-15/85-95 pct),draft
+M9-07,exploratory,M9-Q4-residual-attribution,20261001T181732.397771Z-m9-attribution-bcb0fb9a,,,3d975b1,,rat_usv.evaluation.m9_attribution,private/results/M9/m9_occlusion_regions.png,exploratory; VAE seed 0,draft
+M9-08,exploratory,M9-Q5-identity,20261001T181436.048902Z-m9-5a678459,,,3d975b1,,rat_usv.visualization.m9.identity_figure,private/results/M9/identity.png,100-permutation null,draft

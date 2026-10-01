@@ -1,6 +1,6 @@
 # 0020 — M9 plan: data-driven discovery of developmental call structure (to start 2026-10-02)
 
-Status: **PLAN ONLY.** Nothing in this note has been computed. Owner approved scope on 2026-10-01: "plan it, don't start".
+Status: **EXECUTED 2026-10-01**; results and deviations in decision 0021. (Owner first approved the scope as "plan it, don't start", then asked to start the same evening.)
 
 ## Why
 H-M7a (decisions 0018/0019) showed that six hand-picked contour-shape measures absorb ~76% of the VAE's age information. About a quarter is unexplained, and the six measures came from inspecting example calls. M9 replaces guessing with data-driven discovery and protects against false discoveries with a discovery/confirmation design.
