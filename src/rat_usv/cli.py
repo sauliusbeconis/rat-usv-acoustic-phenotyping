@@ -553,5 +553,40 @@ def shape_test(
     typer.echo(out)
 
 
+@app.command()
+def m9(config: ConfigArg, features_run: RunDir, controls_run: RunDir) -> None:
+    """M9 (decision 0020): rotating litter discovery/confirmation, sex and identity contrasts."""
+    from rat_usv.evaluation.m9 import run_m9
+
+    cfg = load_config(config)
+    out = new_run(cfg, "m9")
+    result = run_m9(features_run, controls_run, out)
+    record_run(out, "m9", cfg, [features_run / "call_curves.npz", controls_run / "splits.json"])
+    typer.echo(json.dumps(result["confirmation"]["gains"], indent=1, default=str)[:4000])
+    typer.echo(out)
+
+
+@app.command("m9-attribution")
+def m9_attribution(
+    config: ConfigArg,
+    m4_run: RunDir,
+    images_run: RunDir,
+    features_run: RunDir,
+    explain_run: RunDir,
+    detector: InputArg = Path("configs/detection/default.yaml"),
+) -> None:
+    """M9 WP5 (exploratory; needs `--group ml`): occlusion and latent traversal of residual age."""
+    from rat_usv.evaluation.m9_attribution import run_attribution  # torch optional
+
+    cfg = load_config(config)
+    out = new_run(cfg, "m9-attribution")
+    det = load_detector_config(detector)
+    result = run_attribution(m4_run, images_run, features_run, explain_run, det, out)
+    write_json(out / "m9_attribution_summary.json", result)
+    record_run(out, "m9-attribution", cfg, [features_run / "call_curves.npz"])
+    typer.echo(json.dumps(result, indent=1))
+    typer.echo(out)
+
+
 if __name__ == "__main__":
     app()

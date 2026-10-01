@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +15,7 @@ from scipy import ndimage
 
 from rat_usv.config import SourceConfig
 from rat_usv.provenance.io import write_json
+from rat_usv.signal.curves import N_POINTS, call_curves
 from rat_usv.signal.detect import DetectorConfig, whitened_spectrogram
 
 CONFIDENT_SNR_DB = 14.0  # decision 0008: primary call set
@@ -101,14 +103,27 @@ def _persistent_jumps(contour: NDArray[np.float64], hold: int = 3) -> int:
     return n
 
 
-def call_features(
+@dataclass
+class Frames:
+    """Per-frame contour data of one call after weak-frame trimming and octave correction."""
+
+    times: NDArray[np.float64]
+    contour: NDArray[np.float64]  # f0, kHz (median-filtered)
+    power: NDArray[np.float64]  # whitened dB at the frame peak
+    harmonic: NDArray[np.float64]  # 1/0 harmonic present, NaN where 2*f0 is out of band
+    tonal: NDArray[np.float64]  # 1 - normalised spectral entropy
+    columns: NDArray[np.int64]  # indices of the kept frames into the call's frames
+    n_candidate: int  # tonal frames before weak-frame trimming
+
+
+def contour_frames(
     f_khz: NDArray[np.float32], t: NDArray[np.float32], db: NDArray[np.float32], cfg: DetectorConfig
-) -> dict[str, float | None] | None:
-    """Features from the whitened spectrogram frames of one call (frames x bins in `db`)."""
+) -> Frames | None:
+    """Fundamental contour from the whitened spectrogram frames of one call (frames x bins in `db`)."""
     if db.shape[1] == 0:
         return None
     bin_khz = float(f_khz[1] - f_khz[0]) if f_khz.size > 1 else 1.0
-    times, f0, power, harmonic, tonal = [], [], [], [], []
+    times, f0, power, harmonic, tonal, cols = [], [], [], [], [], []
     for j in range(db.shape[1]):
         col = db[:, j]
         k = int(np.argmax(col))
@@ -133,25 +148,39 @@ def call_features(
         power.append(peak)
         harmonic.append(float(harm_db > cfg.low_db) if observable else np.nan)
         tonal.append(1 - entropy)
+        cols.append(j)
     if len(f0) < 2:
         return None
     keep = np.array(power) >= np.median(power) - WEAK_FRAME_DB  # drop weak tails/echo fragments
     if keep.sum() < 2:
         return None
-    times = list(np.array(times)[keep])
-    power = list(np.array(power)[keep])
-    harmonic = list(np.array(harmonic, dtype=float)[keep])
-    tonal = list(np.array(tonal)[keep])
-    f0 = list(np.array(f0)[keep])
-    ts = np.array(times)
-    raw = np.array(f0)
+    raw = np.array(f0)[keep]
     # Octave correction: frames that jumped to the harmonic (about 2x the call's median f0).
     centre = float(np.median(raw))
     ratio = raw / centre
     raw = np.where((ratio > 1.75) & (ratio < 2.25), raw / 2, raw)
     raw = np.where((ratio > 0.42) & (ratio < 0.58), raw * 2, raw)
-    contour = ndimage.median_filter(raw, size=3, mode="nearest")
-    pw = np.array(power)
+    return Frames(
+        times=np.array(times)[keep],
+        contour=ndimage.median_filter(raw, size=3, mode="nearest"),
+        power=np.array(power)[keep],
+        harmonic=np.array(harmonic, dtype=float)[keep],
+        tonal=np.array(tonal)[keep],
+        columns=np.array(cols)[keep],
+        n_candidate=len(f0),
+    )
+
+
+def call_features(
+    f_khz: NDArray[np.float32], t: NDArray[np.float32], db: NDArray[np.float32], cfg: DetectorConfig
+) -> dict[str, float | None] | None:
+    """Features from the whitened spectrogram frames of one call (frames x bins in `db`)."""
+    fr = contour_frames(f_khz, t, db, cfg)
+    return None if fr is None else frame_features(fr)
+
+
+def frame_features(fr: Frames) -> dict[str, float | None]:
+    ts, contour, pw, harmonic = fr.times, fr.contour, fr.power, fr.harmonic
     jumps = _persistent_jumps(contour)
     dt_ms = np.diff(ts) * 1000
     arc = float(np.sqrt(dt_ms**2 + np.diff(contour) ** 2).sum())
@@ -174,11 +203,11 @@ def call_features(
             float(np.nanmean(harmonic)) if np.isfinite(harmonic).any() else None
         ),  # share of frames with a harmonic, among frames where 2*f0 is inside the band
         "harmonic_observable_share": float(np.isfinite(harmonic).mean()),
-        "tonality": float(np.mean(tonal)),
+        "tonality": float(np.mean(fr.tonal)),
         "peak_freq_khz": float(contour[int(np.argmax(pw))]),
         "peak_snr_db": float(pw.max()),
         "mean_snr_db": float(pw.mean()),
-        "n_contour_frames": len(f0),
+        "n_contour_frames": fr.n_candidate,
         **shape_features(contour, ts),
     }
 
@@ -204,7 +233,8 @@ def recording_features(
             f_khz = (f / 1000).astype(np.float32)
             for c in owned:
                 sel = (t >= c["start_s"]) & (t <= c["end_s"])
-                feats = call_features(f_khz, t[sel], db[:, sel], cfg)
+                fr = contour_frames(f_khz, t[sel], db[:, sel], cfg)
+                feats = None if fr is None else frame_features(fr)
                 row = {
                     "wav_path": c["wav_path"],
                     "call_index": c["call_index"],
@@ -212,6 +242,10 @@ def recording_features(
                     "contour_ok": feats is not None,
                 }
                 row.update(feats or {})
+                if fr is not None:
+                    row["_curves"] = call_curves(
+                        f_khz, t[sel], db[:, sel], fr.times, fr.contour, fr.columns, cfg
+                    )
                 out.append(row)
     return out
 
@@ -270,10 +304,14 @@ def run_features(
         by_rec[c["wav_path"]].append(c)
     jobs = [(cfg.source_root / p, cs, det) for p, cs in by_rec.items()]
     feats: dict[tuple[str, int], dict[str, Any]] = {}
+    curves: dict[tuple[str, int], dict[str, Any]] = {}
     with ProcessPoolExecutor(workers) as pool:
         for rows in pool.map(_job, jobs):
             for row in rows:
-                feats[row["wav_path"], row["call_index"]] = row
+                key = row["wav_path"], row["call_index"]
+                if "_curves" in row:
+                    curves[key] = row.pop("_curves")
+                feats[key] = row
     merged = []
     for c in calls:
         f = feats.get((c["wav_path"], c["call_index"]), {"contour_ok": False})
@@ -311,5 +349,33 @@ def run_features(
         ),
         "f0_from_half_rule": f"sub-peak at f/2 >= {HALF_MIN_KHZ} kHz within {HALF_WITHIN_DB} dB",
     }
+    summary["curves"] = write_curves(merged, curves, out)
     write_json(out / "features_summary.json", summary)
     return summary
+
+
+CURVES = ("f0", "envelope", "harmonic_ratio", "tonality")
+RAW = ("raw_t", "raw_f0", "raw_env_t", "raw_env")
+NONLINEAR = ("n_subharmonic_events", "subharmonic_frame_share",
+             "n_biphonation_events", "biphonation_frame_share")  # fmt: skip
+
+
+def write_curves(
+    merged: list[dict[str, Any]], curves: dict[tuple[str, int], dict[str, Any]], out: Path
+) -> dict[str, Any]:
+    """M9 WP0: `call_curves.npz` (row i = row i of `call_curves_index.parquet`)."""
+    keys = [
+        (m["wav_path"], m["call_index"])
+        for m in merged
+        if (m["wav_path"], m["call_index"]) in curves
+    ]
+    arrays: dict[str, Any] = {k: np.stack([curves[x][k] for x in keys]) for k in CURVES}
+    for k in RAW:
+        parts = [curves[x][k] for x in keys]
+        arrays[k] = np.concatenate(parts)
+        arrays[f"{k}_offsets"] = np.concatenate([[0], np.cumsum([p.size for p in parts])])
+    np.savez_compressed(out / "call_curves.npz", **arrays)
+    index = [{"row": i, "wav_path": w, "call_index": c, **{k: curves[w, c][k] for k in NONLINEAR}}
+             for i, (w, c) in enumerate(keys)]  # fmt: skip
+    pq.write_table(pa.Table.from_pylist(index), out / "call_curves_index.parquet")
+    return {"calls": len(keys), "points": N_POINTS, "curves": list(CURVES), "raw": list(RAW)}
