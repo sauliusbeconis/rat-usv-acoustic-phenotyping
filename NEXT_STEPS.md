@@ -1,6 +1,6 @@
 # Next steps
 
-**Current milestone: finishing M4 (H2), then M5 and M7** (see `docs/ROADMAP.md`).
+**Current milestone: M7 explanation chain, then M5** (M4 incl. H2/H2b done: decisions 0013, 0014) (see `docs/ROADMAP.md`).
 
 M4/H1 done (decision 0013): learned call embeddings add age information beyond classical features under leave-one-litter-out (combined with classical: VAE +0.66 d, CNN +1.04 d over classical alone; SSL not credited). Runs: `.local/runs/m4_overnight_table.json`, `.local/runs/m4_rich_baseline_secondary.json`.
 

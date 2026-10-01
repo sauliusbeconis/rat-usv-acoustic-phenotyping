@@ -415,5 +415,32 @@ def m4(
     typer.echo(out)
 
 
+@app.command()
+def h2(
+    config: ConfigArg,
+    m4_table: InputArg,
+    images_run: RunDir,
+    controls_run: RunDir,
+) -> None:
+    """H2/H2b (needs `--group ml`): held-out trajectory structure and acoustic age vs weight."""
+    from rat_usv.evaluation.h2 import json_safe, run_h2, run_h2b  # torch optional; import here
+
+    cfg = load_config(config)
+    assert cfg.linkage_dir is not None
+    runs = [cfg.output_root / r["run"] for r in json.loads(m4_table.read_text())]
+    out = new_run(cfg, "h2")
+    result = json_safe(
+        {
+            "h2": run_h2(runs, images_run, controls_run),
+            "h2b": run_h2b(runs, controls_run, cfg.linkage_dir),
+        }
+    )
+    write_json(out / "h2_summary.json", result)
+    record_run(out, "h2", cfg, [m4_table, controls_run / "splits.json"])
+    typer.echo(json.dumps(result["h2"]["by_space"], indent=1))
+    typer.echo(json.dumps(result["h2b"], indent=1))
+    typer.echo(out)
+
+
 if __name__ == "__main__":
     app()
