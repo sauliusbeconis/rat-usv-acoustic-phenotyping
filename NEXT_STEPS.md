@@ -1,11 +1,10 @@
 # Next steps
 
-**Current milestone: M1 — call detection** (see `docs/ROADMAP.md`).
+**Current milestone: M1 — call detection, finishing** (see `docs/ROADMAP.md`, decision 0008).
 
-1. Run `uv run --frozen usv linkage-check --config configs/data/local.yaml` to confirm that the frozen dataset and all source WAVs are reachable.
-2. Choose and implement a USV detector in `src/rat_usv/signal/`. A transparent spectrogram-energy detector is a reasonable first choice; a learned detector is fine if validated. Keep the band below the ~107 kHz Nyquist limit.
-3. Build a stratified validation sample (litters × early/mid/late age × edit-suspected or not). Prepare hand-checking material for the owner (spectrogram pages with proposed calls), then measure precision and recall.
-4. Run detection over all 574 final recordings plus background-only windows; write `calls.parquet` to a new `.local/runs/` directory.
-5. Update the roadmap status.
+Done: detector (`usv detect`), full run over 574 recordings (42,391 calls, background windows, Avisoft agreement, calls per animal-day), and an external sanity benchmark.
 
-History: the M0 audit tooling (`usv inventory`, `evidence-pilot`, … `reconcile-metadata`) and its docs (`docs/M0_*.md`, `docs/decisions/`) reconstructed the dataset. They are kept for provenance and are not needed for new work.
+1. **Owner:** open the latest `.local/runs/*-detect-review-*/review.html` in a browser, label all 225 items (call / not a call / unsure), click *Download labels*, then run
+   `uv run --frozen usv detect-score --config configs/data/local.yaml --review-run <that run> --labels <labels.json>`.
+2. If the share of real calls among detector-only events is low (e.g. under 0.5), tighten the detector (tonality/SNR), re-run `usv detect` and the review on new events. Otherwise freeze the detect run as the M1 output.
+3. Mark M1 done in the roadmap and start M2 (classical per-call features including DeepSqueak-equivalent definitions; per animal-day summaries; mixed-model age trajectories).

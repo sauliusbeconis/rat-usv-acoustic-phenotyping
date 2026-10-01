@@ -25,6 +25,9 @@ from rat_usv.provenance.validation import (
 )
 from rat_usv.qc.audio import audit as audit_wav
 from rat_usv.qc.full_decode import full_decode_pilot as run_full_decode
+from rat_usv.signal.detect import load_detector_config
+from rat_usv.signal.pipeline import run_detection
+from rat_usv.signal.review import build_review, score_review
 from rat_usv.visualization.atlas import dataset_atlas as build_atlas
 
 app = typer.Typer(
@@ -253,6 +256,49 @@ def linkage_check(config: ConfigArg) -> None:
     typer.echo(out)
     if report["source_problems"]:
         raise typer.Exit(code=1)
+
+
+@app.command()
+def detect(
+    config: ConfigArg,
+    detector: InputArg = Path("configs/detection/default.yaml"),
+    workers: Annotated[int, typer.Option(min=1)] = 8,
+    limit: Annotated[int | None, typer.Option(min=1, help="Only the first N recordings")] = None,
+) -> None:
+    """M1: detect calls in all final pup recordings (read-only) and compare with 2020 Avisoft."""
+    cfg = load_config(config)
+    det = load_detector_config(detector)
+    out = new_run(cfg, "detect")
+    summary = run_detection(cfg, det, out, workers, limit)
+    record_run(out, "detect", cfg, [detector])
+    typer.echo(json.dumps({k: summary[k] for k in ("recordings", "calls")}, indent=1))
+    typer.echo(out)
+
+
+RunDir = Annotated[Path, typer.Option(exists=True, file_okay=False)]
+
+
+@app.command("detect-review")
+def detect_review(config: ConfigArg, detect_run: RunDir) -> None:
+    """Build a blind hand-check page (review.html) from a detect run's sampled events."""
+    cfg = load_config(config)
+    out = new_run(cfg, "detect-review")
+    n = build_review(cfg, detect_run, out)
+    record_run(out, "detect-review", cfg, [detect_run / "detection_summary.json"])
+    typer.echo(f"{n} items -> {out / 'review.html'}")
+
+
+@app.command("detect-score")
+def detect_score(config: ConfigArg, review_run: RunDir, labels: InputArg) -> None:
+    """Score the owner's labels.json against the review items (share of real calls per kind)."""
+    cfg = load_config(config)
+    items = json.loads((review_run / "review_items.json").read_text())
+    out = new_run(cfg, "detect-score")
+    result = score_review(items, json.loads(labels.read_text()))
+    write_json(out / "detection_check.json", result)
+    record_run(out, "detect-score", cfg, [review_run / "review_items.json", labels])
+    typer.echo(json.dumps(result, indent=1))
+    typer.echo(out)
 
 
 if __name__ == "__main__":

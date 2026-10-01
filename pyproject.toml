@@ -8,7 +8,16 @@ version = "0.1.0"
 description = "Provenance-first rat USV research infrastructure"
 readme = "README.md"
 requires-python = ">=3.12,<3.15"
-dependencies = ["typer>=0.16,<1", "pydantic>=2.10,<3", "pyarrow>=19,<30", "PyYAML>=6,<7", "numpy>=2,<3", "soundfile>=0.13,<1"]
+dependencies = [
+    "typer>=0.16,<1",
+    "pydantic>=2.10,<3",
+    "pyarrow>=19,<30",
+    "PyYAML>=6,<7",
+    "numpy>=2,<3",
+    "soundfile>=0.13,<1",
+    "scipy>=1.14,<2",
+    "matplotlib>=3.9,<4",
+]
 
 [project.scripts]
 usv = "rat_usv.cli:app"
@@ -36,7 +45,7 @@ disallow_untyped_defs = true
 warn_unused_ignores = true
 
 [[tool.mypy.overrides]]
-module = ["pyarrow.*", "soundfile.*"]
+module = ["pyarrow.*", "soundfile.*", "scipy.*", "matplotlib.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
