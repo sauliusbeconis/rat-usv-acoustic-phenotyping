@@ -13,7 +13,7 @@ Can the multidimensional acoustic structure of rat pup USVs (spectrotemporal mor
 - **H2:** development is a structured trajectory through a latent acoustic space, not a set of independent univariate changes.
 - **H2b:** the acoustic state tracks physical maturation (body weight) beyond chronological age; tested within age with animal-level models.
 - **H3:** temporal organization (intervals, bouts, transitions, entropy) adds information beyond single-call morphology.
-- **H4 (planned, needs new data):** learned representations transfer to an independent cohort, and a pharmacological or disease-model perturbation displaces animals in the same acoustic state space. An external or drug-treated cohort will be obtained (roadmap M8).
+- **H4 (planned, public external data):** learned representations transfer to an independent cohort, and a pharmacological or disease-model perturbation displaces animals in the same acoustic state space. Tested on public external datasets only (roadmap M8); no new experiment. If only call-feature tables are available, the test is limited to classical features.
 
 ## Design (reconstructed, M0)
 A retrospective observational cohort: 28 Wistar pups from 3 litters and 2 dams that shared a cage. Each pup was recorded daily for 5 min in isolation on a heated pad, P1–P21 (P0 = written birth date), then weighed. 574 pup recordings. There is no experimental manipulation; age is the only designed factor. Sex and weight are measured covariates.

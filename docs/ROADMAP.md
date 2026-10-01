@@ -1,6 +1,6 @@
 # Roadmap
 
-This work is a **bachelor's thesis** (Vilnius University, Department of Neurobiology and Biophysics; supervisor Osvaldas Rukšėnas). M1–M4 form the thesis core; M5 and M7 strengthen it; M6 (NASS) is optional and only justified by an M4/M5 gap. M8 (external / perturbation cohort) is planned and runs in parallel; its data must be obtained first.
+This work is a **bachelor's thesis** (Vilnius University, Department of Neurobiology and Biophysics; supervisor Osvaldas Rukšėnas). M1–M4 form the thesis core; M5 and M7 strengthen it; M6 (NASS) is optional and only justified by an M4/M5 gap. M8 (external / perturbation validation) uses **public datasets only**; no new experiment will be run.
 
 Each milestone has one main output and a done-criterion. Work them in order; update the **Status** column when a milestone is done (date + run path). The aims are in `docs/RESEARCH_CONTEXT.md`. Methods are the agent's call unless marked *owner decision*.
 
@@ -14,7 +14,7 @@ Each milestone has one main output and a done-criterion. Work them in order; upd
 | M5 | Temporal organization (H2) | Bout/sequence features and a sequence model vs pooled call representations | Order-shuffle and bout-boundary ablations reported | |
 | M6 | Longitudinal state space (NASS) | `z_animal(t)` model over P1–P21 | Beats the M4/M5 baselines on held-out animals, or the null is recorded. Start only if M4/M5 leave a reproducible gap | |
 | M7 | Explanation + visualization | Latent → call families → acoustic properties → real calls; interactive explorer (point → animal, day, spectrogram, contour, audio); acoustic-landscape figures | Every concept figure is linked to a quantitative result and labelled by visualization class | |
-| M8 | External / perturbation validation (H4) | An independent or drug-treated rat pup cohort processed by the frozen M1–M4 pipeline, with no refitting on its animals | The M4 representation and trajectory are tested on the new cohort; perturbation displacement compared with classical measures; null results recorded | Data to be obtained |
+| M8 | External / perturbation validation (H4) | Public rat pup datasets (control and disease-model or drug groups) processed by the frozen M1–M4 pipeline, with no refitting on their animals | Representation and trajectory tested on the external cohort; group displacement compared with classical measures; null results recorded. Where only call-feature tables are public, the test runs at the classical-feature level | Candidates listed below |
 
 An exploratory explorer (M7 style) may be built right after M1 to help look at the data. It is labelled exploratory.
 
@@ -29,13 +29,17 @@ An exploratory explorer (M7 style) may be built right after M1 to help look at t
 ## Positioning (literature check 2026-10-01)
 Already established: USVs change with age (rat isolation calls peak around P7–11; frequency falls with growth); learned VAE spaces beat hand-picked features (Goffinet et al. 2021, eLife 10:e67855); mouse pup ages separate in VAE space (PMC9805956); rat pup VAE clusters and syntax in a disease model at P6/9/12 (Sci Rep 2025, PMC12304202). Our distinct contribution: **daily P1–P21 sampling of identified individuals with weights**, a held-out-animal, control-backed test of information beyond strong classical features, and whether acoustic state tracks physical maturation (weight) beyond chronological age. Main risk: few calls on late days (heated chamber, natural decline after the second week).
 
+## External data (M8 candidates, checked 2026-10-01)
+| Dataset | Content | Use |
+|---|---|---|
+| Fragile X rat model, developmental USV trajectory ([Zenodo 10.5281/zenodo.20940043](https://zenodo.org/records/20940043), CC BY 4.0, June 2026) | One call-level CSV (3.1 MB), **no audio** | Best match for H4: a disease-model developmental trajectory. Feature-level test only, unless the authors share audio |
+| USCMed rat USVs ([Zenodo 10.5281/zenodo.15011554](https://zenodo.org/records/15011554), CC BY 4.0) | 1.1 TB adult rat audio with hand-scored annotations (fear paradigm; login required) | Not developmental; useful as an independent **detector benchmark** for M1 |
+| USVSEG dataset (Zenodo, via [PLOS ONE 2020](https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0228907)) | Segmented syllable WAVs, including mouse pup isolation calls | Detector benchmark; cross-species sanity check |
+| [mouseTube](https://pmc.ncbi.nlm.nih.gov/articles/PMC5081159/) | Open mouse USV recordings with metadata (strain, age, protocol) | Cross-species transfer of the representation (weaker than rat) |
+
+No public raw-audio rat pup drug or disease-model dataset was found in this search. Still to check: OSF, Dryad, Figshare, and the data statements of rat pup valproate, poly(I:C), chlorpyrifos and MAM studies. Asking authors to share deposited audio counts as using existing data, not a new experiment.
+
 ## Owner decisions still open
-- **Obtain an external or drug-treated cohort for M8** (needed for EXTERNALLY_VALIDATED claims and H4). Options: a new recording in the department's lab under the same protocol (Avisoft, 5-min isolation, P1–P21) with a pharmacological arm; or existing data from published rat pup studies (e.g. the 2025 Sci Rep model study, PMC12304202), requested from the authors. Agree the design or request with the supervisor.
+- **M8 data choice:** pick the external dataset(s) from the table above, and decide whether to ask the Fragile X authors (Auerbach lab, UIUC) for audio. Agree with the supervisor.
 - Dataset release: the data were collected by the thesis author and B. Danilovaitė together; cite her thesis and agree any public release with her and the supervisor.
 
-## If a new cohort is recorded (lessons from M0)
-- **Back up raw files on the day**, read-only, with checksums. Analyse copies only, never re-save originals (127 files in this cohort were altered in 2020).
-- **More dams, housed separately**: at least 6 litters from 6 dams. Assign treatment within litters (split-litter design) so drug and litter effects are separable.
-- **Log per recording**: date and time, pup marking, order, weight, chamber temperature (a reliable thermometer), and who handled the pup. Use the same `X.X.X.X` marking scheme and record the birth date as P0.
-- **Break the age–session link**: randomize recording order within a day, record ambient or empty-chamber control files each session, and record more than one litter per day where possible.
-- Keep the same acquisition settings (Avisoft, 214285 Hz, 301 s, microphone at 10 cm), or document every change.
