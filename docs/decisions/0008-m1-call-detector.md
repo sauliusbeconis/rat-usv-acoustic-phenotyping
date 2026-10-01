@@ -1,6 +1,6 @@
 # 0008 — M1 call detector
 
-Date: 2026-10-01. Status: implemented; hand-check pending.
+Date: 2026-10-01. Status: implemented and hand-checked; M1 output frozen.
 
 ## Decision
 Use a transparent, in-repo spectrogram detector (`src/rat_usv/signal/detect.py`, parameters in `configs/detection/default.yaml`) instead of DeepSqueak, USVSEG or ContourUSV.
@@ -26,6 +26,18 @@ Use a transparent, in-repo spectrogram detector (`src/rat_usv/signal/detect.py`,
 - Agreement with 2020 Avisoft on the 535 non-tuning recordings: recall 0.988, precision 0.806 (P1–P7 0.881, P8–P14 0.837, P15–P21 0.669). This matches the tuning set (recall 0.981, precision 0.809), so there is no sign of overfitting.
 - External sanity check (mouseTube Rat 16, adult, two human annotators): recall 0.90 / 0.93, precision 0.65 / 0.58; the two humans agree at recall 0.84 and precision 0.97. Not used for tuning.
 - Calls per recording (median by age): every day has calls; only 2 recordings have zero. Medians: P1–P4 26–61, a dip at P5–P7 (16, 19, 7.5), a peak at P11–P16 (75–153), then a decline to P21 (12). Recordings with fewer than 10 calls cluster at P5–P7 and P21. The extra (non-Avisoft) detections are most common at P15–P21, so the hand-check decides how much of the late-day signal is real.
+
+## Owner hand-check (2026-10-01; review run `20261001T105526.069317Z-detect-review-43771a52`, score run `20261001T111822.116582Z-detect-score-0a7558f2`)
+Blind labels on 225 stratified events from non-tuning recordings (share that were real calls, Wilson 95% CI):
+- Detected by both: 45/45 = 1.00 (0.92–1.00). Empty background windows: 0/36 (0–0.10).
+- Detector only: 60/99 = 0.61 (0.51–0.70); by age band 24/33, 16/33, 20/33.
+- 2020 Avisoft only: 21/45 = 0.47 (0.33–0.61). Of those 21, 5 were fragments of a call the detector captured whole; the 2020 analysis split multi-note calls. Matching now credits such fragments (`fragments_covered`); the stored full-run summary predates this and counts them as misses.
+
+Estimates for all 535 non-tuning recordings, weighted by stratum: **precision ≈ 0.93**, and recall relative to calls found by either method ≈ 0.99 (about 16/45 × 404 ≈ 144 real misses). Calls missed by both methods are rare (0/36 empty windows).
+
+**Confidence flag.** Peak SNR separates real from spurious extras: in the detector-only events, real calls had a median of 19 dB and noise a median of 11 dB (90% ≤ 13.4). Requiring peak SNR ≥ 14 dB gives precision ≈ 0.99 but drops 15 of 60 faint real calls. The cut is **age-dependent**: 8% of calls at P1–P14 are below 14 dB versus 19% at P15–P21. So the cut is a flag, not a filter: morphology analyses use `peak_snr_db ≥ 14` as primary, with all detections as a sensitivity analysis, and call-rate analyses report both. This threshold was chosen on the same labels, so the 0.99 is optimistic.
+
+**Harmonics.** Rat pup isolation calls often carry a second harmonic (a parallel band at about 2× the fundamental, e.g. 40 and 80 kHz). The detector keeps it inside the same call, which is correct. But the per-call contour follows the loudest band, so it can jump to the harmonic. M2 features must track the fundamental and record harmonic presence as a feature. Frequency jumps (a contour breaking into notes) are also part of one call.
 
 ## Known limits
 Very short calls (< ~8 ms) are under-detected; adjacent calls closer than 8 ms are merged; calls entirely below 25 kHz are dropped. Harmonics are not separated from fundamentals (the contour follows the loudest band). The USCMed raw-audio benchmark is not yet run.

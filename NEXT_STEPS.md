@@ -1,10 +1,10 @@
 # Next steps
 
-**Current milestone: M1 — call detection, finishing** (see `docs/ROADMAP.md`, decision 0008).
+**Current milestone: M2 — classical phenotype + baseline** (see `docs/ROADMAP.md`).
 
-Done: detector (`usv detect`), full run over 574 recordings (42,391 calls, background windows, Avisoft agreement, calls per animal-day), and an external sanity benchmark.
+M1 is done (decision 0008): detect run `.local/runs/20261001T103654.209131Z-detect-55e24631` (`calls.parquet`, `background_windows.parquet`, `recordings_detection.parquet`), hand-checked by the owner.
 
-1. **Owner:** open the latest `.local/runs/*-detect-review-*/review.html` in a browser, label all 225 items (call / not a call / unsure), click *Download labels*, then run
-   `uv run --frozen usv detect-score --config configs/data/local.yaml --review-run <that run> --labels <labels.json>`.
-2. If the share of real calls among detector-only events is low (e.g. under 0.5), tighten the detector (tonality/SNR), re-run `usv detect` and the review on new events. Otherwise freeze the detect run as the M1 output.
-3. Mark M1 done in the roadmap and start M2 (classical per-call features including DeepSqueak-equivalent definitions; per animal-day summaries; mixed-model age trajectories).
+1. Per-call features from the audio of each detected call: fundamental-frequency contour (track f0, not the louder harmonic), duration, start/end/min/max/mean f0, bandwidth, slope, curvature/sinuosity, tonality, amplitude/SNR, harmonic presence, frequency-jump count; plus DeepSqueak-equivalent definitions for the M8 Fragile X comparison.
+2. Per animal-day summaries: call count and rate, inter-call intervals, bouts.
+3. Mixed-model age trajectories (animal random effect; sex; litter as a fixed effect or sensitivity) and individual-animal trajectory figures with CIs (evidence figures).
+4. Use `peak_snr_db >= 14` as the primary call set and all detections as a sensitivity analysis.

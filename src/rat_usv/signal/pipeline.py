@@ -70,6 +70,7 @@ def _rates(m: Any) -> dict[str, Any]:
         "tp": m.true_positive,
         "fp": m.false_positive,
         "fn": m.false_negative,
+        "fragments_covered": m.fragments_covered,
         "precision": m.precision,
         "recall": m.recall,
     }

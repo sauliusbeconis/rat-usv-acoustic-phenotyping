@@ -18,6 +18,7 @@ class MatchResult:
     false_positive: int
     false_negative: int
     pairs: list[tuple[int, int]]
+    fragments_covered: int = 0
 
     @property
     def precision(self) -> float | None:
@@ -49,4 +50,15 @@ def match_calls(
             used_r.add(j)
             pairs.append((i, j))
     tp = len(pairs)
-    return MatchResult(tp, len(detected) - tp, len(reference) - tp, sorted(pairs))
+    # Unmatched reference calls lying inside a matched detection are fragments of that call
+    # (e.g. a multi-note call split by the reference annotator), not misses.
+    matched = [detected[i] for i in used_d]
+    covered = sum(
+        1
+        for j, r in enumerate(reference)
+        if j not in used_r
+        and any(min(d.end_s, r.end_s) - max(d.start_s, r.start_s) > min_overlap_s for d in matched)
+    )
+    return MatchResult(
+        tp, len(detected) - tp, len(reference) - tp - covered, sorted(pairs), covered
+    )

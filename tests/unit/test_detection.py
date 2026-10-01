@@ -57,8 +57,10 @@ def test_match_calls_one_to_one():
     detected = [C(0.0, 1.0), C(2.0, 3.0), C(5.0, 6.0)]
     reference = [C(0.5, 1.5), C(0.9, 1.1), C(2.5, 2.6)]
     m = match_calls(detected, reference)
-    assert (m.true_positive, m.false_positive, m.false_negative) == (2, 1, 1)
-    assert m.precision == pytest.approx(2 / 3) and m.recall == pytest.approx(2 / 3)
+    # reference (0.9, 1.1) is a fragment inside the matched detection (0, 1), not a miss
+    assert (m.true_positive, m.false_positive, m.false_negative) == (2, 1, 0)
+    assert m.fragments_covered == 1
+    assert m.precision == pytest.approx(2 / 3) and m.recall == pytest.approx(1.0)
 
 
 def test_background_windows_avoid_calls():
