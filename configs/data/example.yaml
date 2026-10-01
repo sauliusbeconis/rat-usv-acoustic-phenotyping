@@ -11,3 +11,5 @@ audit_hash:
   max_file_bytes: 268435456
   max_total_bytes: 536870912
 audio_window_seconds: 1.0
+# Folder with recordings.csv from the private data linkage (optional).
+linkage_dir: ../../private/data-linkage

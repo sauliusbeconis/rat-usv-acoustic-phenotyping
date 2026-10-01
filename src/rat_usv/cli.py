@@ -10,6 +10,7 @@ import typer
 from rat_usv.config import load_config
 from rat_usv.data.crosswalk import seed_crosswalk
 from rat_usv.data.inventory import inventory as build_inventory
+from rat_usv.data.linkage import check_sources, load_recordings, summarize
 from rat_usv.evidence.pilot import extract_pilot, validate_bundle_file
 from rat_usv.evidence.reconcile import reconcile_metadata as reconcile_records
 from rat_usv.evidence.review import review_packet as build_review_packet
@@ -232,6 +233,25 @@ def validate(
     record_run(out, "validate", cfg, inputs)
     typer.echo(out)
     if report["errors"]:
+        raise typer.Exit(code=1)
+
+
+@app.command("linkage-check")
+def linkage_check(config: ConfigArg) -> None:
+    """Validate the frozen recording linkage and confirm every WAV is present (stat only)."""
+    cfg = load_config(config)
+    if cfg.linkage_dir is None:
+        raise typer.BadParameter("Config needs linkage_dir (folder containing recordings.csv)")
+    rows = load_recordings(cfg.linkage_dir)
+    report = summarize(rows)
+    report["source_problems"] = check_sources(rows, cfg.source_root)
+    out = new_run(cfg, "linkage-check")
+    write_json(out / "linkage_check.json", report)
+    record_run(out, "linkage-check", cfg, [cfg.linkage_dir / "recordings.csv"])
+    typer.echo(json.dumps({k: v for k, v in report.items() if k != "source_problems"}, indent=1))
+    typer.echo(f"source problems: {len(report['source_problems'])}")
+    typer.echo(out)
+    if report["source_problems"]:
         raise typer.Exit(code=1)
 
 

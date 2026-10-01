@@ -2,7 +2,7 @@
 
 Reproducible rat ultrasonic-vocalization research, from immutable source evidence to cautious acoustic phenotyping and longitudinal representation research.
 
-**Current status: M0 infrastructure, not M0 scientific completion.** No models are trained, no biological identities have been assigned, no final splits exist and no novelty is claimed. The internal NASS concept is a research proposal.
+**Current status:** the dataset is reconstructed and frozen (M0 done): 574 daily pup recordings, 28 pups, P1–P21. Next milestone: call detection (M1). Aims: `docs/RESEARCH_CONTEXT.md`. Plan: `docs/ROADMAP.md`. Agent rules: `AGENTS.md`. No models are trained yet and no novelty is claimed; NASS is a working concept.
 
 ## Start here
 

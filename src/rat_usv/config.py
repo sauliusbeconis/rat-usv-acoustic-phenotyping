@@ -22,6 +22,7 @@ class SourceConfig(BaseModel):
     hash: HashPolicy = Field(default_factory=HashPolicy)
     audit_hash: HashPolicy = Field(default_factory=HashPolicy)
     audio_window_seconds: float = Field(default=1.0, gt=0, le=10)
+    linkage_dir: Path | None = None
 
     @model_validator(mode="after")
     def safe_paths(self) -> "SourceConfig":
@@ -52,8 +53,8 @@ def load_config(path: Path) -> SourceConfig:
     raw = yaml.safe_load(path.read_text())
     if not isinstance(raw, dict):
         raise ValueError("Configuration must be a YAML mapping")
-    for key in ("source_root", "output_root"):
-        if key in raw:
+    for key in ("source_root", "output_root", "linkage_dir"):
+        if raw.get(key) is not None:
             value = Path(raw[key]).expanduser()
             raw[key] = value if value.is_absolute() else path.parent / value
     return SourceConfig.model_validate(raw)

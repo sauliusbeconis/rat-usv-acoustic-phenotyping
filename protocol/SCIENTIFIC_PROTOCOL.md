@@ -1,26 +1,30 @@
-# Scientific protocol — draft v0, not locked
+# Scientific protocol — draft v0.2, not locked
 
-## Question and scope
+Lock this protocol (dated, with its digest recorded) before the first M4 held-out comparison is run. Changes after locking need a dated decision note.
 
-Working hypothesis H-001: multidimensional rat USV acoustic structure contains developmental information beyond conventional acoustic summaries. This is a research direction, not a confirmed result or finalized primary endpoint. Cohort, strain, experimental conditions, acquisition settings, allocation, ethics approval identifier and usable developmental range remain to be reconstructed from source evidence.
+## Context
+Bachelor's thesis, Vilnius University, Department of Neurobiology and Biophysics; supervisor Osvaldas Ruksenas. The recordings were collected for an earlier bachelor's thesis in the same department and are reused with citation.
+
+## Question
+Can the multidimensional acoustic structure of rat pup USVs (spectrotemporal morphology, timing, sequence organization) capture postnatal development more completely than conventional summary variables? See `docs/RESEARCH_CONTEXT.md`.
+
+## Hypotheses
+- **H1 (primary):** USV structure contains information about postnatal developmental state beyond conventional acoustic summary variables.
+- **H2:** development is a structured trajectory through a latent acoustic space, not a set of independent univariate changes.
+- **H2b:** the acoustic state tracks physical maturation (body weight) beyond chronological age; tested within age with animal-level models.
+- **H3:** temporal organization (intervals, bouts, transitions, entropy) adds information beyond single-call morphology.
+- **H4 (future):** learned representations transfer to unseen animals, then to independent cohorts and perturbations.
+
+## Design (reconstructed, M0)
+A retrospective observational cohort: 28 Wistar pups from 3 litters and 2 dams that shared a cage. Each pup was recorded daily for 5 min in isolation on a heated pad, P1–P21 (P0 = written birth date), then weighed. 574 pup recordings. There is no experimental manipulation; age is the only designed factor. Sex and weight are measured covariates.
 
 ## Units and estimands
+- The animal is the independent unit; calls, bouts and animal-days are nested repeated observations. Report animal N and observation N separately.
+- **Primary estimand (H1):** in held-out animals (leave-one-animal-out), the improvement in recovering postnatal age at the animal-day level when the learned representation is added to classical features, compared with classical features alone. The learned comparator must include the AVA VAE baseline before any custom model is credited. Uncertainty comes from animal-level resampling. A difference counts only if its CI excludes zero and every M3 negative control stays at chance.
+- **H2 estimand:** consistency of held-out animals' trajectories in representation space (e.g. the age ordering of animal-day centroids, and the distance–age relationship), compared with univariate feature trajectories.
 
-The animal is the biological unit. Calls are nested observations; repeated sessions and animal-days are dependent. Preserve litter/dam links. For litter-level exposure, independent replication may be at litter level. After M0 define whether the primary estimand is held-out-animal age prediction, within-animal developmental change, or a different biological contrast; these are distinct questions. Do not imply that predictive age signal identifies a neural mechanism.
+## Known confounds and limits
+Within a litter, age is identical to recording session and cumulative handling. Calendar date and age are partly separable across litters. Litter and dam effects are only weakly estimable (3 and 2 units). 127 recordings may have been edited after acquisition; primary results are run with and without them. Chamber temperature is unreliable and excluded. Claims are limited to this cohort until an independent cohort is analysed.
 
-## Required before protocol v1 lock
-
-1. Complete source inventory, duplicate audit, hashes/freeze strategy and acquisition assessment.
-2. Reviewed animal/litter/dam crosswalk with evidence locators, unknowns and conflict ledger; recordings tied to canonical animals or explicitly unresolved.
-3. Candidate days interpreted from birth/recording evidence, not directory names alone; units for weight and sex encoding reconciled.
-4. Inclusion/exclusion criteria based on recording validity and prospective biological scope; missingness and duplicate decisions recorded before outcomes.
-5. One primary hypothesis, endpoint, estimator, uncertainty procedure and meaningful effect/comparison criterion. Define secondary/exploratory families and multiplicity handling.
-6. Animal/litter/batch split strategy and sample-size feasibility; no final splits during scaffold work.
-7. Detector/manual annotation validation, nuisance controls, fit-scope boundaries, allowed external data and test-access policy.
-8. Named human scientific review, date, protocol digest and deviation procedure.
-
-## Interpretation boundaries
-
-Observational association is not causation. Technical recording differences, litter, maternal effects, temperature, separation/handling and missingness are candidate confounders to investigate; their presence/values are not assumed. Biological age and recording batch may be inseparable in this collection. If design cannot distinguish them, narrow the claim rather than promise a model will fix it. No prospective power number can be justified before independent animal/litter counts and outcome variability are known.
-
-All protocol changes receive a dated decision record, rationale, prior-data exposure and effect on confirmatory/exploratory status. The test set is not a debugging dataset. Preserve null and failed results.
+## Evaluation rules
+Only training animals are used for any learned step (normalization, selection, dimensionality reduction, SSL, tuning). Nested grouped cross-validation is used for tuning. Seeds, failures and compute budgets are recorded. The negative controls in `docs/ROADMAP.md` (M3) are mandatory before any H1/H2 claim. Exploratory projections are never evidence.
