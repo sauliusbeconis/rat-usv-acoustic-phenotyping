@@ -2,7 +2,7 @@
 
 **Current milestone: finishing M4 (H2), then M5 and M7** (see `docs/ROADMAP.md`).
 
-M4/H1 done (decision 0013): learned call embeddings add age information beyond classical features under leave-one-litter-out (VAE +0.66 d, CNN +1.04 d over VAE+classical baseline chain; SSL not credited). Runs: `.local/runs/m4_overnight_table.json`, `.local/runs/m4_rich_baseline_secondary.json`.
+M4/H1 done (decision 0013): learned call embeddings add age information beyond classical features under leave-one-litter-out (combined with classical: VAE +0.66 d, CNN +1.04 d over classical alone; SSL not credited). Runs: `.local/runs/m4_overnight_table.json`, `.local/runs/m4_rich_baseline_secondary.json`.
 
 1. **H2 (protocol estimand):** trajectory consistency of held-out pups in representation space. Use the VAE (unsupervised; age never seen in training) as the primary space and the CNN as secondary: the age ordering of animal-day centroids, the distance–age relationship, compared with univariate classical trajectories.
 2. **H2b:** does the acoustic state track body weight beyond age? Use within-age, animal-level models on embeddings and classical features.
