@@ -1,10 +1,11 @@
 # Next steps
 
-**Current milestone: M4, waiting on two owner decisions** (see `docs/ROADMAP.md` → *Owner decisions*).
+**Current milestone: M4 — representation ladder, overnight training launched 2026-10-01 ~16:04 local** (decisions 0011, 0012).
 
-Done: M1 (0008), M2 (0009), M3 (0010). Inputs for M4: detect run `20261001T103654.209131Z-detect-55e24631`, features `20261001T115113.379619Z-features-7b168652`, controls and frozen splits `20261001T122013.275165Z-controls-c4cf4161`.
+The overnight chain (`.local/setup/overnight_m4.sh`, detached) runs VAE (40 epochs), CNN (30) and contrastive SSL (60) for seeds 0, 1 and 2 under leave-one-litter-out. Each run writes `.local/runs/*-m4-{kind}-*/m4_{kind}_summary.json`. When all 9 finish, the table is collected into `.local/runs/m4_overnight_table.json`.
 
-1. Owner decides the primary evaluation split (session leak, decision 0010).
-2. Owner chooses the M4 model design from presented options; AVA VAE is the required learned baseline.
-3. Lock `protocol/SCIENTIFIC_PROTOCOL.md` (estimand, split, metrics, controls) before the first M4 held-out comparison.
-4. Still open from M2: verify the DeepSqueak-equivalent feature definitions before M8.
+In the morning:
+1. Check `.local/runs/overnight_m4_*.log` for `ALL DONE` and any non-zero `exit`.
+2. Read `m4_overnight_table.json`. For each rung and seed: per-pup MAE (classical, learned, combined), the primary gain (classical − combined) with pup-bootstrap CI, the background-embedding control, and the H1 criteria from protocol v1.
+3. Write the M4 decision note: report all seeds, credit a rung only if it beats the earlier rungs and the classical features, and state H1 status. Then present results to the owner before M5.
+4. Still open: verify the DeepSqueak-equivalent features (M8 prerequisite).
