@@ -26,6 +26,7 @@ from rat_usv.provenance.validation import (
 )
 from rat_usv.qc.audio import audit as audit_wav
 from rat_usv.qc.full_decode import full_decode_pilot as run_full_decode
+from rat_usv.representations.images import build_images
 from rat_usv.signal.detect import load_detector_config
 from rat_usv.signal.features import run_features
 from rat_usv.signal.pipeline import run_detection
@@ -368,6 +369,49 @@ def controls(
         )
     )
     typer.echo(f"splits sha256 {result['splits_sha256']}")
+    typer.echo(out)
+
+
+@app.command("call-images")
+def call_images(
+    config: ConfigArg,
+    detect_run: RunDir,
+    features_run: RunDir,
+    detector: InputArg = Path("configs/detection/default.yaml"),
+    workers: Annotated[int, typer.Option(min=1)] = 8,
+) -> None:
+    """M4 input: 128x128 whitened spectrogram images of confident calls and background crops."""
+    cfg = load_config(config)
+    out = new_run(cfg, "call-images")
+    summary = build_images(
+        cfg.source_root, detect_run, features_run, load_detector_config(detector), out, workers
+    )
+    write_json(out / "images_summary.json", summary)
+    record_run(out, "call-images", cfg, [detector, features_run / "call_features.parquet"])
+    typer.echo(json.dumps(summary, indent=1))
+    typer.echo(out)
+
+
+@app.command()
+def m4(
+    config: ConfigArg,
+    kind: Annotated[str, typer.Option(help="vae | cnn | ssl")],
+    images_run: RunDir,
+    controls_run: RunDir,
+    epochs: Annotated[int, typer.Option(min=1)] = 40,
+    seed: int = 0,
+) -> None:
+    """M4 ladder rung (needs `--group ml`): learned embeddings vs classical, leave-one-litter-out."""
+    if kind not in {"vae", "cnn", "ssl"}:
+        raise typer.BadParameter("kind must be vae, cnn or ssl")
+    from rat_usv.evaluation.m4 import run_m4  # torch is optional; import only here
+
+    cfg = load_config(config)
+    out = new_run(cfg, f"m4-{kind}")
+    summary = run_m4(kind, images_run, controls_run, out, epochs, seed)
+    inputs = [controls_run / "splits.json", images_run / "calls_index.parquet"]
+    record_run(out, f"m4-{kind}", cfg, inputs)
+    typer.echo(json.dumps(summary, indent=1))
     typer.echo(out)
 
 
