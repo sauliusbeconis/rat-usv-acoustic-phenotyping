@@ -1,17 +1,26 @@
 # Next steps
 
-Status 2026-10-01: M0–M5 and M7 (first pass) done; decisions 0008–0017.
+## Tomorrow (2026-10-02): M9, data-driven discovery (plan: decision 0020)
+Start with work package 0, then go in order: 1 → 2 → 3 → 4 (runner) → 5 → 6 → 7. About one working day.
 
+Inputs (all private, `.local/runs/`):
+- detect run `20261001T103654.209131Z-detect-55e24631`
+- features run with shape `20261001T164535.599872Z-features-c17ba600`
+- controls + frozen splits `20261001T122013.275165Z-controls-c4cf4161`
+- call images `20261001T124005.643225Z-call-images-c60840b7`
+- M4 table `m4_overnight_table.json` (VAE seed 0–2 runs); explain run `20261001T153401.888949Z-explain-1a8315ae`
+
+Rules: discovery code must never load the held-out (confirmation) litter; lock and hash predictions before confirmation; FDR q = 0.05; confirmed = ≥ 2 of 3 rotations; baseline = classical + six H-M7a shape features.
+
+## Status so far
 | Hypothesis | Status |
 |---|---|
 | H1 learned call structure adds age information beyond classical features | INTERNALLY_VALIDATED (0013) |
+| H-M7a contour shape explains most of it | Consistent within cohort, ~76% of the VAE gain; external test inconclusive (0018, 0019) |
 | H2 trajectory through acoustic space | OBSERVED, session-confounded (0014) |
-| H2b acoustic state tracks weight beyond age | Not supported (0014) |
+| H2b acoustic state tracks weight | Not supported (0014) |
 | H3 call timing or order adds information | Not supported (0017) |
-| H-M7a contour shape carries the extra signal | Consistent within cohort: pre-registered shape features +0.79 d, absorb ~76% of the VAE gain; independent Fragile X test inconclusive (0018, 0019) |
 
-Remaining options (owner to choose):
-1. **M8 external test** on the public Fragile X rat pup call table: verify DeepSqueak-equivalent features first. It is feature-level only, so it can test classical features, H-M7a-type contour features and developmental trends, but not the learned embeddings.
-2. External replication of H-M7a needs contour-level data: ask the Fragile X authors (Auerbach lab) for audio.
-3. **Thesis write-up support:** figure registry, methods text from decisions 0008–0017, results tables.
-4. M7 extras: CNN-space versions, multi-seed landscape stability.
+## Later
+- External replication: ask the Fragile X authors (Auerbach lab) for audio (owner and supervisor).
+- Thesis support: figure registry, methods from decisions 0008–0020, results tables.
