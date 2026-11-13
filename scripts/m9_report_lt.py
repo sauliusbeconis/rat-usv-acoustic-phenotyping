@@ -537,12 +537,12 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
         P(f"Šeši iš anksto apibrėžti formos požymiai sumažino testinių vadų jauniklių amžiaus nustatymo paklaidą nuo "
           f"{num(mae['c'].mean())} iki {num(mae['cs'].mean())} d (skirtumas {num(gain_c)} d, 95{NB}% PI {ci(0.657, 0.933)}); "
           f"paklaida sumažėjo {who} (1{NB}pav.). Papildžius klasikinius požymius VAE reprezentacija, paklaida sumažėjo "
-          f"panašiai (vidutiniškai iki {num(vae_mean)} d; trijų atsitiktinių sėklų vidurkis), tačiau šeši formos požymiai "
+          f"panašiai (vidutiniškai iki {num(vae_mean)} d; trijų nepriklausomai apmokytų VAE modelių vidurkis), tačiau šeši formos požymiai "
           f"paaiškino apie 76{NB}% (74–78{NB}%) šio pagerėjimo. Vadinasi, didžioji dalis to, ką prideda išmokta "
           f"reprezentacija, nėra „juodoji dėžė“ – tai daugiausia vokalizacijos kontūro forma."),
         figure("gain", 1, "Amžiaus nustatymo paklaida testinėse vadose",
                "(A) Vidutinė jauniklio paklaida, naudojant klasikinius požymius ir juos papildžius VAE reprezentacija, "
-               "šešiais formos požymiais arba abiem (VAE – trijų sėklų vidurkis). (B) Kiekvieno jauniklio paklaida be "
+               "šešiais formos požymiais arba abiem (VAE – trijų atskirai apmokytų modelių vidurkis). (B) Kiekvieno jauniklio paklaida be "
                "formos požymių ir su jais; spalva žymi vadą"),
         P("Formos požymių kryptys sutapo su iš anksto suformuluota prognoze: su amžiumi didėjo dažnio poslinkiai "
           "vokalizacijos pradžioje ir pabaigoje (U forma) ir stiprėjo smulki dažnio moduliacija. Tačiau hipotezė buvo "
@@ -675,7 +675,7 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
         figure("occlusion", 6, "Spektrogramos sričių uždengimo poveikis liekamajam amžiaus įverčiui",
                "Vidutinis absoliutus įverčio pokytis (d), uždengus f0 arba antrosios harmonikos (2f0) juostą vokalizacijos "
                "pradžios, vidurio ar pabaigos trečdalyje; stulpeliai – amžiaus grupės. Žvalgomoji analizė (vienas "
-               "VAE modelis, sėkla 0)",
+               "VAE modelis)",
                width=10.5),
     ]  # fmt: skip
     story += [
