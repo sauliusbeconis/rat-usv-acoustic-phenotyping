@@ -665,7 +665,7 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
           "tikrinimui su naujais duomenimis."),
         table(2, "Amžiaus paklaidos sumažėjimas (d) testinėje vadoje, bazinį modelį (klasikiniai ir šeši formos "
                  "požymiai) papildžius požymių grupe. Teigiama vertė reiškia mažesnę paklaidą; po ja – 95" + NB + "% PI, "
-                 "skliaustuose – iš anksto prognozuota kryptis; paryškinta – patvirtinta", g_rows,
+                 "skliaustuose – iš anksto užfiksuota prognozė: (+) – grupė sumažins paklaidą, (−) – nesumažins; paryškinta – rezultatas reikšmingas ir sutampa su prognoze", g_rows,
                  [5.2, 3.0, 3.0, 3.0, 2.4]),
     ]  # fmt: skip
     story += H("Liekamoji informacija, lytis ir individualumas", 1, "6.")
