@@ -707,11 +707,11 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
 
     story += H("Kas toliau", 1)
     story += [
-        P("Labai laukiame naujų duomenų. Visa analizės grandinė (vokalizacijų aptikimas, kontūrai, formos požymiai ir "
+        P("Labai laukiu naujų duomenų. Visa analizės grandinė (vokalizacijų aptikimas, kontūrai, formos požymiai ir "
           "raidos modelis) yra užfiksuota, todėl naujus įrašus bus galima išanalizuoti iš karto ir nieko nekeičiant. "
           "Nauja kohorta leistų nepriklausomai patikrinti šiuos rezultatus, o kandidatus (amplitudės, harmonikų ir "
           "tonalumo požymius) – iš anksto užregistruotu testu."),
-        P("Kol kas planuojame rankiniu žymėjimu patikrinti bifonacijos ir subharmonikų detektorius ir įvertinti, "
+        P("Kol kas planuoju rankiniu žymėjimu patikrinti bifonacijos ir subharmonikų detektorius ir įvertinti, "
           "ar verta vokalizacijas analizuoti platesnėje dažnių juostoje."),
     ]  # fmt: skip
 
