@@ -510,8 +510,23 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
         Paragraph("Žiurkių jauniklių ultragarsinių vokalizacijų forma ir raida: naujausi rezultatai", h1),
         Paragraph(f"{AUTHOR} · tarpiniai rezultatai · 2026 m. lapkritis", sub),
         P("Analizuotos 28 jauniklių iš trijų vadų (E2L1, E2L2, E2L3) vokalizacijos, įrašytos P1–P21 dienomis. Visi "
-          "rezultatai tikrinti <b>testinėje vadoje</b>, t. y. vadoje, kurios duomenų modelis ar požymių atranka "
-          "nematė.", indent=False),
+          "rezultatai tikrinti <b>testinėje vadoje</b> – tokioje, kurios duomenys nebuvo naudoti nei modeliui mokyti, "
+          "nei požymiams atrinkti.", indent=False),
+        Spacer(1, 4),
+        P("<b>Sąvokos</b>", indent=False),
+        *bullets([
+            "<b>Klasikiniai požymiai</b> – įprasti suvestiniai dydžiai: vokalizacijų skaičius ir dažnumas, trukmė, "
+            "vidutinis, mažiausias ir didžiausias dažnis, dažnių juostos plotis, nuolydis ir kt.",
+            "<b>f0</b> – pagrindinis dažnis; jo kitimas per vokalizaciją vadinamas <b>kontūru</b>.",
+            "<b>Šeši formos požymiai</b> – iš anksto apibrėžti kontūro formos matai: dažnio poslinkis vokalizacijos "
+            "pradžioje ir pabaigoje, U indeksas, išlinkimas ir du smulkios dažnio moduliacijos matai.",
+            "<b>VAE</b> (variacinis autoenkoderis) – neuroninis tinklas, kuris be jokių išankstinių nurodymų išmoksta "
+            "kiekvienos vokalizacijos spektrogramą aprašyti nedideliu skaičiumi kintamųjų. Tai „juodosios dėžės“ "
+            "palyginimo taškas: jis parodo, kiek amžiaus informacijos apskritai galima išgauti iš spektrogramos, "
+            "bet nepasako, kokia ji.",
+            "<b>fPCA</b> (funkcinė pagrindinių komponenčių analizė) – metodas, kuris iš pačių duomenų išskiria "
+            "pagrindinius kontūro formų tipus (komponentes).",
+        ]),
     ]  # fmt: skip
     story += H("Svarbiausia", 1)
     story += bullets([
@@ -535,7 +550,7 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
     )
     story += [
         P(f"Šeši iš anksto apibrėžti formos požymiai sumažino testinių vadų jauniklių amžiaus nustatymo paklaidą nuo "
-          f"{num(mae['c'].mean())} iki {num(mae['cs'].mean())} d (skirtumas {num(gain_c)} d, 95{NB}% PI {ci(0.657, 0.933)}); "
+          f"{num(mae['c'].mean())} iki {num(mae['cs'].mean())} d (skirtumas {num(gain_c)} d, 95{NB}% pasikliautinasis intervalas (PI) {ci(0.657, 0.933)}); "
           f"paklaida sumažėjo {who} (1{NB}pav.). Papildžius klasikinius požymius VAE reprezentacija, paklaida sumažėjo "
           f"panašiai (vidutiniškai iki {num(vae_mean)} d; trijų nepriklausomai apmokytų VAE modelių vidurkis), tačiau šeši formos požymiai "
           f"paaiškino apie 76{NB}% (74–78{NB}%) šio pagerėjimo. Vadinasi, didžioji dalis to, ką prideda išmokta "
@@ -565,7 +580,7 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
     story += [
         P(f"Iš 31 kandidatinio požymio {n_conf} pasitvirtino bent dviejose iš trijų testinių vadų, iš jų {n_all3} – "
           "visose trijose (1" + NB + "lentelė). Kiekvienai vadai požymiai ir tikėtina jų kitimo kryptis buvo atrinkti tik "
-          "iš kitų dviejų vadų, prognozės užfiksuotos ir tik tada patikrintos (FDR q = 0,05). Su amžiumi daugėjo vokalizacijų, kurių dažnis kyla (pabaiga aukštesnė už "
+          "iš kitų dviejų vadų, prognozės užfiksuotos ir tik tada patikrintos (taikant kelių palyginimų korekciją, FDR q = 0,05). Su amžiumi daugėjo vokalizacijų, kurių dažnis kyla (pabaiga aukštesnė už "
           "pradžią), mažėjo arkos ir daugėjo U formos kontūrų, amplitudės maksimumas slinko vokalizacijos pabaigos link, "
           "gilėjo amplitudės moduliacija ir dažnėjo staigūs dažnio šuoliai (3" + NB + "pav.). Arkos komponentė glaudžiai "
           "susijusi su anksčiau apibrėžtu išlinkimo požymiu (Spearmano ρ = −0,95), todėl duomenimis grįstas metodas, "
@@ -593,7 +608,7 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
                 cells.append(txt if r["confirmed"] else f"({txt})")
         rows.append([lab, *cells, f"{v['rotations_confirmed']} iš 3"])
     story += [table(1, "Iš anksto užfiksuotų prognozių patikrinimas testinėse vadose. Stulpeliai – testinė vada; vertės – "
-                    "standartizuoto požymio pokytis per 10 dienų; skliaustuose – nepatvirtinta (nereikšminga po FDR "
+                    "požymio pokytis per 10 dienų standartinių nuokrypių vienetais; skliaustuose – nepatvirtinta (nereikšminga po FDR "
                     "korekcijos arba priešinga kryptimi). Pateikti 13 iš 31 tikrinto požymio", rows,
                     [6.6, 2.3, 2.3, 2.3, 2.5])]  # fmt: skip
     story += [
@@ -656,9 +671,12 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
     story += H("Liekamoji informacija, lytis ir individualumas", 1, "6.")
     rho = attr["rho_drop_when_occluded"]
     story += [
-        P("Žvalgomojoje analizėje tirta, kuriose spektrogramos srityse slypi ta VAE amžiaus informacija, kurios "
-          "nepaaiškina klasikiniai ir formos požymiai. Uždengus f0 juostą, liekamasis amžiaus įvertis kito labiausiai, "
-          "tačiau daugiausia informacijos prarasta uždengus antrąją harmoniką: koreliacija sumažėjo "
+        P("Žvalgomojoje analizėje tirta, kuriose spektrogramos srityse slypi papildoma VAE amžiaus informacija. "
+          "Tam kiekvienai vokalizacijai apskaičiuotas "
+          "liekamasis amžiaus įvertis – VAE amžiaus prognozės dalis, kurios nepaaiškina klasikiniai ir formos "
+          "požymiai, – ir stebėta, kaip jis keičiasi uždengus skirtingas spektrogramos sritis. Uždengus f0 juostą, "
+          "įvertis kito labiausiai, tačiau daugiausia informacijos prarasta uždengus antrąją harmoniką: įverčio "
+          "koreliacija su tikruoju liekamuoju amžiumi sumažėjo "
           f"{num(rho['harm_middle'], 3)} vokalizacijos viduryje, o uždengus bet kurią f0 juostos dalį – ne daugiau kaip "
           f"{num(max(rho['fund_start'], rho['fund_middle'], rho['fund_end']), 3)}. Harmonikos įtaka didžiausia P1–7, o "
           "P15–21 ji beveik išnyksta (6" + NB + "pav.). Tikėtina, kad taip yra todėl, jog didėjant f0 antroji harmonika "
@@ -668,7 +686,7 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
           "Individualūs jauniklių „balsai“ atpažįstami silpnai, bet geriau nei atsitiktinai: kitą dieną įrašytų "
           "vokalizacijų subalansuotas atpažinimo tikslumas didelėse vadose siekė "
           f"{num(ident[ident['pups'] > 5]['balanced_accuracy'].min())}–"
-          f"{num(ident[ident['pups'] > 5]['balanced_accuracy'].max())}, o atsitiktinai sumaišius jauniklių žymes – "
+          f"{num(ident[ident['pups'] > 5]['balanced_accuracy'].max())}, o atsitiktinai sumaišius, kuriam jaunikliui priklauso vokalizacijos, – "
           f"{num(ident[ident['pups'] > 5]['null_mean'].min())}–{num(ident[ident['pups'] > 5]['null_mean'].max())}. "
           "Nenustatyta, kad individualumas su amžiumi aiškiai stiprėtų. Kadangi tą pačią dieną jauniklis ir įrašymo "
           "sesija sutampa, šis rezultatas yra preliminarus."),
@@ -680,10 +698,10 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
     ]  # fmt: skip
     story += [
         Spacer(1, 6),
-        P("<b>Ribotumai.</b> Visi rezultatai gauti vienoje kohortoje (trys vados; E2L2 – tik 4 jaunikliai). Rotacijos "
-          "nėra visiškai nepriklausomos, nes kiekviena vada du kartus naudota požymių atrankai. Kadangi su amžiumi "
+        P("<b>Ribotumai.</b> Visi rezultatai gauti vienoje kohortoje (trys vados; E2L2 – tik 4 jaunikliai). Trys "
+          "patikrinimai nėra visiškai nepriklausomi, nes kiekviena vada du kartus naudota požymių atrankai. Kadangi su amžiumi "
           "kinta dauguma požymių, patvirtinta amžiaus tendencija yra gana žema kartelė; griežtesnis yra papildomos "
-          "informacijos patikrinimas (5 skyrelis). Netiesinių reiškinių detektoriai nepatikrinti rankiniu žymėjimu. "
+          "informacijos patikrinimas (5 skyrelis). Bifonacijos, subharmonikų ir dažnio šuolių detektoriai nepatikrinti rankiniu žymėjimu. "
           "Rezultatai aprašo akustinius pokyčius, tačiau nieko nesako apie juos lemiančius mechanizmus."),
     ]  # fmt: skip
 
