@@ -81,7 +81,7 @@ def comma_axis(ax: Any, which: str = "both") -> None:
 def panel(ax: Any, letter: str) -> None:
     from matplotlib.transforms import ScaledTranslation
 
-    off = ScaledTranslation(-30 / 72, 6 / 72, ax.figure.dpi_scale_trans)
+    off = ScaledTranslation(-40 / 72, 8 / 72, ax.figure.dpi_scale_trans)
     ax.text(
         0,
         1,
@@ -191,7 +191,7 @@ def fig_modes() -> Path:
         for rot, c in LIT.items():
             with np.load(M9 / f"m9_bases_holdout_{rot}.npz") as z:
                 b.plot(tau, z["f0_modes"][j], color=c, lw=1.4, label=f"be {rot}")
-        b.set_xlabel("Signalo trukmė (%)")
+        b.set_xlabel("Vokalizacijos trukmė (%)")
         comma_axis(b)
     axes[0, 0].set_ylabel("f0 nuokrypis (kHz)")
     axes[1, 0].set_ylabel("Komponentės svoris")
@@ -266,8 +266,8 @@ def fig_examples() -> Path:
     pos = idx.merge(calls[["wav_path", "call_index", "score"]], on=["wav_path", "call_index"])
     pos = pos[pos["litter_id"] == "E2L2"]
     q = pos["score"].quantile([0.05, 0.15, 0.85, 0.95]).to_numpy()
-    rows = [("A", "Krintantys", pos[pos["score"].between(q[0], q[1])].sample(6, random_state=0)),
-            ("B", "Kylantys", pos[pos["score"].between(q[2], q[3])].sample(6, random_state=0))]  # fmt: skip
+    rows = [("A", "Krintančios", pos[pos["score"].between(q[0], q[1])].sample(6, random_state=0)),
+            ("B", "Kylančios", pos[pos["score"].between(q[2], q[3])].sample(6, random_state=0))]  # fmt: skip
     fig, axes = plt.subplots(2, 6, figsize=(TEXT_W_CM * IN, 7.0 * IN))
     for r, (letter, lab, sel) in enumerate(rows):
         sel = sel.sort_values("postnatal_age_days")
@@ -427,7 +427,7 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
         canv.restoreState()
 
     doc = Doc(str(PDF), pagesize=A4, leftMargin=2.5 * cm, rightMargin=1.5 * cm, topMargin=2 * cm, bottomMargin=2 * cm,
-              title="Žiurkių jauniklių ultragarsinių signalų forma ir postnatalinė raida", author=AUTHOR,
+              title="Žiurkių jauniklių ultragarsinių vokalizacijų forma ir postnatalinė raida", author=AUTHOR,
               subject="Tarpiniai rezultatai", lang="lt-LT")  # fmt: skip
     frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id="f", leftPadding=0, rightPadding=0,
                   topPadding=0, bottomPadding=0)  # fmt: skip
@@ -507,47 +507,49 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
                          spaceAfter=10)  # fmt: skip
     who = "visiems 28 jaunikliams" if improved == 28 else f"{improved} iš 28 jauniklių"
     story: list[Any] = [
-        Paragraph("Žiurkių jauniklių ultragarsinių signalų forma ir raida: naujausi rezultatai", h1),
+        Paragraph("Žiurkių jauniklių ultragarsinių vokalizacijų forma ir raida: naujausi rezultatai", h1),
         Paragraph(f"{AUTHOR} · tarpiniai rezultatai · 2026 m. lapkritis", sub),
-        P("Analizuoti 28 jauniklių iš trijų vadų (E2L1, E2L2, E2L3) signalai, įrašyti P1–P21 dienomis. Visi "
+        P("Analizuotos 28 jauniklių iš trijų vadų (E2L1, E2L2, E2L3) vokalizacijos, įrašytos P1–P21 dienomis. Visi "
           "rezultatai tikrinti <b>testinėje vadoje</b>, t. y. vadoje, kurios duomenų modelis ar požymių atranka "
           "nematė.", indent=False),
     ]  # fmt: skip
     story += H("Svarbiausia", 1)
     story += bullets([
-        f"Šeši signalo formos požymiai sumažina testinių vadų jauniklių amžiaus nustatymo paklaidą nuo "
+        f"Šeši vokalizacijos formos požymiai sumažina testinių vadų jauniklių amžiaus nustatymo paklaidą nuo "
         f"{num(mae['c'].mean())} iki {num(mae['cs'].mean())} d ({who}) ir paaiškina apie 76{NB}% VAE "
         "reprezentacijos pranašumo prieš klasikinius požymius.",
         f"Duomenimis išskirtos šešios f0 kontūro formos paaiškina {num(100 * sum(var), 0)}{NB}% kontūrų dispersijos ir "
         "išlieka beveik identiškos, nesvarbu, kuri vada neįtraukta.",
         f"{n_conf} iš 31 naujo požymio amžiaus tendencija pasikartojo bent dviejose testinėse vadose ({n_all3} – "
-        "visose trijose): su amžiumi daugėja kylančio dažnio ir U formos signalų, amplitudės maksimumas slenka "
+        "visose trijose): su amžiumi daugėja kylančio dažnio ir U formos vokalizacijų, amplitudės maksimumas slenka "
         "pabaigos link, gilėja amplitudės moduliacija ir dažnėja dažnio šuoliai.",
-        "Signalų įvairovė su amžiumi didėja, taip pat ir to paties tipo signalų viduje: P1–P21 laikotarpiu signalai "
-        "netampa vienodesni.",
+        "Vokalizacijų įvairovė su amžiumi didėja, taip pat ir to paties tipo vokalizacijų viduje: P1–P21 laikotarpiu vokalizacijos "
+        "netampa vienodesnės.",
         "Nė viena nauja požymių grupė patikimai nepagerino amžiaus nustatymo, palyginti su klasikiniais ir šešiais "
         "formos požymiais; amplitudės, harmonikų ir tonalumo požymiai lieka kandidatu tolesniam tikrinimui.",
     ], numbered=True)  # fmt: skip
 
     # ---------------------------------------------------------- results
-    story += H("Signalo forma suteikia informacijos, kurios neturi klasikiniai požymiai", 1, "1.")
+    story += H(
+        "Vokalizacijos forma suteikia informacijos, kurios neturi klasikiniai požymiai", 1, "1."
+    )
     story += [
         P(f"Šeši iš anksto apibrėžti formos požymiai sumažino testinių vadų jauniklių amžiaus nustatymo paklaidą nuo "
           f"{num(mae['c'].mean())} iki {num(mae['cs'].mean())} d (skirtumas {num(gain_c)} d, 95{NB}% PI {ci(0.657, 0.933)}); "
           f"paklaida sumažėjo {who} (1{NB}pav.). Papildžius klasikinius požymius VAE reprezentacija, paklaida sumažėjo "
           f"panašiai (vidutiniškai iki {num(vae_mean)} d; trijų atsitiktinių sėklų vidurkis), tačiau šeši formos požymiai "
           f"paaiškino apie 76{NB}% (74–78{NB}%) šio pagerėjimo. Vadinasi, didžioji dalis to, ką prideda išmokta "
-          f"reprezentacija, nėra „juodoji dėžė“ – tai daugiausia signalo kontūro forma."),
+          f"reprezentacija, nėra „juodoji dėžė“ – tai daugiausia vokalizacijos kontūro forma."),
         figure("gain", 1, "Amžiaus nustatymo paklaida testinėse vadose",
                "(A) Vidutinė jauniklio paklaida, naudojant klasikinius požymius ir juos papildžius VAE reprezentacija, "
                "šešiais formos požymiais arba abiem (VAE – trijų sėklų vidurkis). (B) Kiekvieno jauniklio paklaida be "
                "formos požymių ir su jais; spalva žymi vadą"),
         P("Formos požymių kryptys sutapo su iš anksto suformuluota prognoze: su amžiumi didėjo dažnio poslinkiai "
-          "signalo pradžioje ir pabaigoje (U forma) ir stiprėjo smulki dažnio moduliacija. Tačiau hipotezė buvo "
+          "vokalizacijos pradžioje ir pabaigoje (U forma) ir stiprėjo smulki dažnio moduliacija. Tačiau hipotezė buvo "
           "suformuluota tiriant tą pačią kohortą, todėl šis rezultatas jai neprieštarauja, bet nėra nepriklausomas "
           "jos patvirtinimas."),
     ]  # fmt: skip
-    story += H("Signalų formų rinkinys yra stabilus", 1, "2.")
+    story += H("Vokalizacijų formų rinkinys yra stabilus", 1, "2.")
     story += [
         P(f"fPCA išskyrė šešias kontūro komponentes, kurios kartu paaiškino {num(100 * sum(var), 0)}{NB}% "
           f"dispersijos. Pirmosios trys aprašo dažnio kitimo kryptį ({num(100 * var[0], 0)}{NB}%), skirtumą tarp arkos "
@@ -563,20 +565,20 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
     story += [
         P(f"Iš 31 kandidatinio požymio {n_conf} pasitvirtino bent dviejose iš trijų testinių vadų, iš jų {n_all3} – "
           "visose trijose (1" + NB + "lentelė). Kiekvienai vadai požymiai ir tikėtina jų kitimo kryptis buvo atrinkti tik "
-          "iš kitų dviejų vadų, prognozės užfiksuotos ir tik tada patikrintos (FDR q = 0,05). Su amžiumi daugėjo signalų, kurių dažnis kyla (pabaiga aukštesnė už "
-          "pradžią), mažėjo arkos ir daugėjo U formos kontūrų, amplitudės maksimumas slinko signalo pabaigos link, "
+          "iš kitų dviejų vadų, prognozės užfiksuotos ir tik tada patikrintos (FDR q = 0,05). Su amžiumi daugėjo vokalizacijų, kurių dažnis kyla (pabaiga aukštesnė už "
+          "pradžią), mažėjo arkos ir daugėjo U formos kontūrų, amplitudės maksimumas slinko vokalizacijos pabaigos link, "
           "gilėjo amplitudės moduliacija ir dažnėjo staigūs dažnio šuoliai (3" + NB + "pav.). Arkos komponentė glaudžiai "
           "susijusi su anksčiau apibrėžtu išlinkimo požymiu (Spearmano ρ = −0,95), todėl duomenimis grįstas metodas, "
           "„nežinodamas“ hipotezės, rado tą pačią U formos kryptį."),
     ]  # fmt: skip
     t1_feats = [
-        ("f0m_P1_med", "f0 kryptis (kylantys signalai)"), ("f0m_P2_med", "Arkos komponentė"),
+        ("f0m_P1_med", "f0 kryptis (kylančios vokalizacijos)"), ("f0m_P2_med", "Arkos komponentė"),
         ("f0m_P3_med", "Banguotumo komponentė"), ("env_rise_frac_med", "Amplitudės maksimumo vieta"),
         ("env_fall_frac_med", "Amplitudės slopimo trukmė"), ("env_am_depth_db_med", "Amplitudės moduliacijos gylis"),
-        ("share_jump", "Signalų su dažnio šuoliu dalis"), ("share_biphonation", "Bifonacijos tipo signalų dalis"),
-        ("harmonic_ratio_db_med", "Harmonikų ir f0 santykis"), ("tonality_middle_med", "Tonalumas signalo viduryje"),
+        ("share_jump", "Vokalizacijų su dažnio šuoliu dalis"), ("share_biphonation", "Bifonacijos tipo vokalizacijų dalis"),
+        ("harmonic_ratio_db_med", "Harmonikų ir f0 santykis"), ("tonality_middle_med", "Tonalumas vokalizacijos viduryje"),
         ("var_f0m_P1", "f0 krypties įvairovė"), ("var_log_duration", "Trukmės įvairovė"),
-        ("var_within_family_f0m_P1", "f0 krypties įvairovė to paties tipo signalų viduje"),
+        ("var_within_family_f0m_P1", "f0 krypties įvairovė to paties tipo vokalizacijų viduje"),
     ]  # fmt: skip
     rows: list[list[Any]] = [["Požymis", "E2L1", "E2L2", "E2L3", "Patvirtinta"]]
     for f, lab in t1_feats:
@@ -596,36 +598,36 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
                     [6.6, 2.3, 2.3, 2.3, 2.5])]  # fmt: skip
     story += [
         P("Harmonikų ir f0 santykis kito netiesiškai: jis mažėjo iki maždaug P12, o vėliau vėl šiek tiek padidėjo. "
-          "Tonalumo sumažėjimas pasitvirtino tik dviejose vadose. Bifonacijos tipo signalai buvo reti, o jų "
+          "Tonalumo sumažėjimas pasitvirtino tik dviejose vadose. Bifonacijos tipo vokalizacijos buvo retos, o jų "
           "detektorius dar nepatikrintas rankiniu žymėjimu, todėl šį rezultatą reikia vertinti atsargiai."),
         figure("trends", 3, "Patvirtintų požymių kitimas su amžiumi",
-               "(A) f0 krypties komponentė, (B) arkos komponentė, (C) amplitudės maksimumo vieta (signalo trukmės "
+               "(A) f0 krypties komponentė, (B) arkos komponentė, (C) amplitudės maksimumo vieta (vokalizacijos trukmės "
                "dalis), (D) amplitudės moduliacijos gylis. Plonos linijos – atskiri jaunikliai, storos – vados mediana "
                "(slankusis trijų dienų vidurkis)"),
-        P("Šiuos pokyčius iliustruoja realūs signalų pavyzdžiai (4" + NB + "pav.): jaunesnių jauniklių signalų kontūrai "
+        P("Šiuos pokyčius iliustruoja realūs vokalizacijų pavyzdžiai (4" + NB + "pav.): jaunesnių jauniklių vokalizacijų kontūrai "
           "dažniau krintantys ar plokšti, vyresnių – kylantys. Pavyzdžiai parinkti iš 5–15 ir 85–95 procentilių "
           "intervalų, kad atspindėtų tipiškus, o ne kraštutinius atvejus."),
-        figure("examples", 4, "Tipiški signalai su skirtinga f0 kitimo kryptimi (vada E2L2)",
-               "(A) Krintantys signalai (f0 krypties komponentės 5–15 procentilis). (B) Kylantys signalai "
+        figure("examples", 4, "Tipiškos vokalizacijos su skirtinga f0 kitimo kryptimi (vada E2L2)",
+               "(A) Krintančios vokalizacijos (f0 krypties komponentės 5–15 procentilis). (B) Kylančios vokalizacijos "
                "(85–95 procentilis). Spektrogramos 18–100" + NB + "kHz juostoje; virš kiekvienos nurodytas "
                "jauniklio amžius"),
     ]  # fmt: skip
-    story += H("Signalų įvairovė su amžiumi didėja", 1, "4.")
+    story += H("Vokalizacijų įvairovė su amžiumi didėja", 1, "4.")
     story += [
-        P("Tikėtasi, kad jaunikliams augant signalai taps vienodesni (stereotipiškumo hipotezė). Rezultatai rodo "
+        P("Tikėtasi, kad jaunikliams augant vokalizacijos taps vienodesnės (stereotipiškumo hipotezė). Rezultatai rodo "
           "priešingai: visose trijose vadose su amžiumi didėjo f0 komponenčių ir trukmės įvairovė (robastinis "
-          "standartinis nuokrypis per jauniklio dieną), o dviejose vadose ji didėjo ir to paties tipo signalų viduje "
-          "(5" + NB + "pav.). Vadinasi, įvairovės augimo negalima paaiškinti vien besikeičiančiu signalų tipų santykiu. "
-          "Trukmės įvairovė buvo didžiausia apie P11–15. Taigi per pirmąsias tris savaites jauniklių signalų "
+          "standartinis nuokrypis per jauniklio dieną), o dviejose vadose ji didėjo ir to paties tipo vokalizacijų viduje "
+          "(5" + NB + "pav.). Vadinasi, įvairovės augimo negalima paaiškinti vien besikeičiančiu vokalizacijų tipų santykiu. "
+          "Trukmės įvairovė buvo didžiausia apie P11–15. Taigi per pirmąsias tris savaites jauniklių vokalizacijų "
           "repertuaras plečiasi, o ne siaurėja."),
-        figure("variability", 5, "Signalų įvairovės kitimas su amžiumi",
+        figure("variability", 5, "Vokalizacijų įvairovės kitimas su amžiumi",
                "(A) f0 krypties komponentės, (B) trukmės logaritmo ir (C) f0 krypties komponentės to paties tipo "
-               "signalų viduje įvairovė (robastinis SD). Linijos – kaip 3" + NB + "pav."),
+               "vokalizacijų viduje įvairovė (robastinis SD). Linijos – kaip 3" + NB + "pav."),
     ]  # fmt: skip
     story += H("Papildoma naujų požymių informacija nepatvirtinta", 1, "5.")
     g_rows: list[list[Any]] = [["Požymių grupė", "E2L1", "E2L2", "E2L3", "Patvirtinta"]]
     g_names = {"f0_modes": "f0 formos komponentės", "env_modes": "Amplitudės gaubtinės komponentės",
-               "beyond": "Amplitudė, harmonikos, tonalumas, šuoliai", "variability": "Signalų įvairovė",
+               "beyond": "Amplitudė, harmonikos, tonalumas, šuoliai", "variability": "Vokalizacijų įvairovė",
                "all_selected": "Visi atrinkti požymiai"}  # fmt: skip
     for b, lab in g_names.items():
         cells = []
@@ -657,21 +659,21 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
         P("Žvalgomojoje analizėje tirta, kuriose spektrogramos srityse slypi ta VAE amžiaus informacija, kurios "
           "nepaaiškina klasikiniai ir formos požymiai. Uždengus f0 juostą, liekamasis amžiaus įvertis kito labiausiai, "
           "tačiau daugiausia informacijos prarasta uždengus antrąją harmoniką: koreliacija sumažėjo "
-          f"{num(rho['harm_middle'], 3)} signalo viduryje, o uždengus bet kurią f0 juostos dalį – ne daugiau kaip "
+          f"{num(rho['harm_middle'], 3)} vokalizacijos viduryje, o uždengus bet kurią f0 juostos dalį – ne daugiau kaip "
           f"{num(max(rho['fund_start'], rho['fund_middle'], rho['fund_end']), 3)}. Harmonikos įtaka didžiausia P1–7, o "
           "P15–21 ji beveik išnyksta (6" + NB + "pav.). Tikėtina, kad taip yra todėl, jog didėjant f0 antroji harmonika "
           "dažniausiai patenka už 100" + NB + "kHz analizės juostos ribų. Taigi dalis šio efekto gali būti techninė."),
         P("Lyties ir amžiaus sąveika nė vienam iš patvirtintų požymių nebuvo reikšminga po FDR korekcijos "
           f"(mažiausia nekoreguota p = {num(min(r['p'] for r in bio['sex_by_age']['features'].values()), 3)}). "
           "Individualūs jauniklių „balsai“ atpažįstami silpnai, bet geriau nei atsitiktinai: kitą dieną įrašytų "
-          "signalų subalansuotas atpažinimo tikslumas didelėse vadose siekė "
+          "vokalizacijų subalansuotas atpažinimo tikslumas didelėse vadose siekė "
           f"{num(ident[ident['pups'] > 5]['balanced_accuracy'].min())}–"
           f"{num(ident[ident['pups'] > 5]['balanced_accuracy'].max())}, o atsitiktinai sumaišius jauniklių žymes – "
           f"{num(ident[ident['pups'] > 5]['null_mean'].min())}–{num(ident[ident['pups'] > 5]['null_mean'].max())}. "
           "Nenustatyta, kad individualumas su amžiumi aiškiai stiprėtų. Kadangi tą pačią dieną jauniklis ir įrašymo "
           "sesija sutampa, šis rezultatas yra preliminarus."),
         figure("occlusion", 6, "Spektrogramos sričių uždengimo poveikis liekamajam amžiaus įverčiui",
-               "Vidutinis absoliutus įverčio pokytis (d), uždengus f0 arba antrosios harmonikos (2f0) juostą signalo "
+               "Vidutinis absoliutus įverčio pokytis (d), uždengus f0 arba antrosios harmonikos (2f0) juostą vokalizacijos "
                "pradžios, vidurio ar pabaigos trečdalyje; stulpeliai – amžiaus grupės. Žvalgomoji analizė (vienas "
                "VAE modelis, sėkla 0)",
                width=10.5),
@@ -687,12 +689,12 @@ def build(figs: dict[str, Path], mae: pd.DataFrame, vae_mean: float, both_mean: 
 
     story += H("Kas toliau", 1)
     story += [
-        P("Labai laukiame naujų duomenų. Visa analizės grandinė (signalų aptikimas, kontūrai, formos požymiai ir "
+        P("Labai laukiame naujų duomenų. Visa analizės grandinė (vokalizacijų aptikimas, kontūrai, formos požymiai ir "
           "raidos modelis) yra užfiksuota, todėl naujus įrašus bus galima išanalizuoti iš karto ir nieko nekeičiant. "
           "Nauja kohorta leistų nepriklausomai patikrinti šiuos rezultatus, o kandidatus (amplitudės, harmonikų ir "
           "tonalumo požymius) – iš anksto užregistruotu testu."),
         P("Kol kas planuojame rankiniu žymėjimu patikrinti bifonacijos ir subharmonikų detektorius ir įvertinti, "
-          "ar verta signalus analizuoti platesnėje dažnių juostoje."),
+          "ar verta vokalizacijas analizuoti platesnėje dažnių juostoje."),
     ]  # fmt: skip
 
     from functools import partial
